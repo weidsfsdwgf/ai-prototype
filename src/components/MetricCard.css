@@ -1,0 +1,42 @@
+.metric-card {
+  display: grid;
+  min-height: 112px;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.metric-card__label {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.metric-card strong {
+  color: var(--color-text);
+  font-size: 24px;
+  font-weight: 650;
+  line-height: 30px;
+}
+
+.metric-card__change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.metric-card--healthy .metric-card__change {
+  color: var(--color-success);
+}
+
+.metric-card--warning .metric-card__change {
+  color: var(--color-warning);
+}
+
+.metric-card--risk .metric-card__change {
+  color: var(--color-danger);
+}

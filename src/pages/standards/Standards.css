@@ -1,0 +1,209 @@
+.standard-list-filter .ant-form {
+  row-gap: 12px;
+}
+
+.standard-list-filter .ant-form-item {
+  margin-bottom: 0;
+}
+
+.standard-list-filter .ant-input-affix-wrapper,
+.standard-list-filter .ant-select-selector,
+.standard-list-filter .ant-picker,
+.standard-list-filter .ant-btn {
+  min-height: 36px;
+}
+
+.standard-list-filter__keyword {
+  width: 220px;
+}
+
+.standard-list-filter__actions {
+  margin-inline-end: 0;
+}
+
+.standard-list-filter__action-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.standard-list-filter__business-actions {
+  position: relative;
+  padding-left: 12px;
+}
+
+.standard-list-filter__business-actions::before {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  width: 1px;
+  background: var(--color-border);
+  content: "";
+}
+
+.standard-list-filter__utility-action {
+  border-color: var(--color-action-neutral-border);
+  background: var(--color-action-neutral-bg);
+  color: var(--color-action-neutral);
+}
+
+.standard-list-filter__utility-action:hover {
+  border-color: var(--color-primary) !important;
+  background: var(--color-primary-soft) !important;
+  color: var(--color-primary) !important;
+}
+
+.standard-list-filter__create-action {
+  border-color: var(--color-action-positive);
+  background: var(--color-action-positive-bg);
+  color: var(--color-action-positive);
+}
+
+.standard-list-filter__create-action:hover {
+  border-color: var(--color-action-positive-hover) !important;
+  background: var(--color-action-positive-bg) !important;
+  color: var(--color-action-positive-hover) !important;
+}
+
+.standard-list-filter__danger-action {
+  border-color: var(--color-action-danger);
+  background: var(--color-action-danger-bg);
+  color: var(--color-action-danger);
+}
+
+.standard-list-filter__danger-action:hover {
+  border-color: var(--color-action-danger-hover) !important;
+  background: var(--color-action-danger-bg) !important;
+  color: var(--color-action-danger-hover) !important;
+}
+
+.detail-layout,
+.config-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+  align-items: start;
+}
+
+.detail-layout__main,
+.detail-layout__side,
+.form-layout {
+  display: grid;
+  gap: 16px;
+}
+
+.contact-block {
+  display: grid;
+  gap: 6px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.contact-block strong {
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.payment-progress {
+  padding: 4px 0 12px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 20px;
+}
+
+.upload-icon {
+  display: inline-flex;
+  margin: 0;
+  color: var(--color-primary);
+}
+
+.standard-tabs > .ant-tabs-nav {
+  margin-bottom: 16px;
+}
+
+.state-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.state-box {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+}
+
+.standard-tree-node-title {
+  display: flex;
+  min-width: 0;
+  min-height: 28px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.standard-tree-node-title__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.standard-tree-node-title__actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  opacity: 0;
+}
+
+.ant-tree-node-content-wrapper:hover .standard-tree-node-title__actions,
+.ant-tree-node-selected .standard-tree-node-title__actions {
+  opacity: 1;
+}
+
+.standard-tree-node-menu {
+  display: grid;
+  min-width: 140px;
+  gap: 4px;
+}
+
+.standard-tree-node-menu .ant-btn {
+  justify-content: flex-start;
+  padding-inline: 8px;
+}
+
+@media (max-width: 1080px) {
+  .detail-layout,
+  .config-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .form-grid,
+  .state-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .standard-list-filter__action-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .standard-list-filter__business-actions {
+    padding-top: 12px;
+    padding-left: 0;
+  }
+
+  .standard-list-filter__business-actions::before {
+    top: 0;
+    right: 0;
+    bottom: auto;
+    width: auto;
+    height: 1px;
+  }
+}

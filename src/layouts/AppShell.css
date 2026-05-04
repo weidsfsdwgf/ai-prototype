@@ -1,0 +1,93 @@
+.app-shell {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.app-shell__sider {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  border-right: 1px solid var(--color-border);
+  overflow: auto;
+}
+
+.app-shell__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 18px;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.app-shell__brand-mark {
+  display: grid;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-size: 18px;
+}
+
+.app-shell__header {
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  display: flex;
+  height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--color-border);
+  line-height: 1;
+}
+
+.app-shell__header-left,
+.app-shell__header-right {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-shell__breadcrumb {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-shell__breadcrumb .ant-breadcrumb-link,
+.app-shell__breadcrumb .ant-breadcrumb-separator {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.app-shell__avatar {
+  background: #0f766e;
+}
+
+.app-shell__content {
+  min-width: 0;
+  padding: 24px;
+}
+
+@media (max-width: 860px) {
+  .app-shell__header {
+    padding: 0 16px;
+  }
+
+  .app-shell__breadcrumb {
+    max-width: 52vw;
+  }
+
+  .app-shell__content {
+    padding: 16px;
+  }
+}

@@ -1,0 +1,55 @@
+.roster-drawer .ant-drawer-body {
+  background: var(--color-bg);
+  padding: 20px;
+}
+
+.roster-drawer__content {
+  display: grid;
+  gap: 16px;
+}
+
+.roster-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 16px;
+}
+
+.roster-form-grid .ant-form-item {
+  margin-bottom: 18px;
+}
+
+.roster-inline-tip {
+  margin-bottom: 16px;
+}
+
+.roster-detail-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 20px;
+}
+
+.roster-detail-list dt {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.roster-detail-list dd {
+  margin: 4px 0 0;
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+@media (max-width: 1120px) {
+  .roster-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .roster-form-grid,
+  .roster-detail-list {
+    grid-template-columns: 1fr;
+  }
+}

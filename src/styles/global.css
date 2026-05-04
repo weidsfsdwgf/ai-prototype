@@ -1,0 +1,67 @@
+:root {
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-active: #1e40af;
+  --color-success: #16a34a;
+  --color-success-hover: #15803d;
+  --color-warning: #d97706;
+  --color-warning-soft: #fffbeb;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-info: #0891b2;
+  --color-text: #172033;
+  --color-text-secondary: #5c667a;
+  --color-border: #d8dee8;
+  --color-bg: #f5f7fb;
+  --color-surface: #ffffff;
+  --color-primary-soft: #e8f0ff;
+  --color-success-soft: #eefbf2;
+  --color-warning-soft: #fffbeb;
+  --color-danger-soft: #fef2f2;
+  --color-neutral-soft: #f7f9fc;
+  --color-action-link: var(--color-primary);
+  --color-action-link-hover: var(--color-primary-hover);
+  --color-action-positive: var(--color-success);
+  --color-action-positive-hover: var(--color-success-hover);
+  --color-action-positive-bg: var(--color-success-soft);
+  --color-action-danger: var(--color-danger);
+  --color-action-danger-hover: var(--color-danger-hover);
+  --color-action-danger-bg: var(--color-danger-soft);
+  --color-action-neutral: var(--color-text-secondary);
+  --color-action-neutral-bg: var(--color-neutral-soft);
+  --color-action-neutral-border: var(--color-border);
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.ant-menu-inline {
+  border-inline-end: 0 !important;
+}
+
+.ant-table-wrapper .ant-table {
+  color: var(--color-text);
+}

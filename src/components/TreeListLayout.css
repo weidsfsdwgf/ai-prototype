@@ -1,0 +1,76 @@
+.tree-list-layout {
+  display: grid;
+  grid-template-columns: var(--tree-list-sidebar-width) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.tree-list-layout__tree {
+  position: sticky;
+  top: 80px;
+  min-width: 0;
+}
+
+.tree-list-layout__tree .section-panel__body {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.tree-list-layout__tree .ant-tree {
+  background: transparent;
+}
+
+.tree-list-layout__list {
+  display: grid;
+  min-width: 0;
+  gap: 16px;
+}
+
+.tree-list-search {
+  width: 100%;
+}
+
+.tree-list-summary {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-neutral-soft);
+}
+
+.tree-list-summary dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.tree-list-summary div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tree-list-summary dt {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.tree-list-summary dd {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+
+@media (max-width: 1120px) {
+  .tree-list-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tree-list-layout__tree {
+    position: static;
+  }
+}

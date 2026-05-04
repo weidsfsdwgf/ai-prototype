@@ -1,0 +1,426 @@
+.scorecard-table-row--selected > td {
+  background: var(--color-primary-soft) !important;
+}
+
+.scorecard-workbench-tabs .ant-tabs-content-holder {
+  min-height: 240px;
+}
+
+.scorecard-two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.scorecard-config-block,
+.scorecard-form-block {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.scorecard-config-block h3,
+.scorecard-form-block h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.scorecard-field-list {
+  display: grid;
+  gap: 8px;
+}
+
+.scorecard-field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-neutral-soft);
+}
+
+.scorecard-field-row span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.scorecard-field-row small {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.scorecard-collapse-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.scorecard-standard-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.scorecard-item-block {
+  display: grid;
+  gap: 10px;
+}
+
+.scorecard-item-block__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.scorecard-item-block__title strong {
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.scorecard-publish-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.scorecard-validation-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.scorecard-validation-list li + li {
+  margin-top: 4px;
+}
+
+.scorecard-preview {
+  display: grid;
+  gap: 16px;
+}
+
+.scorecard-preview__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.scorecard-preview__header h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+}
+
+.scorecard-preview__header p {
+  margin: 4px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.scorecard-preview__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.scorecard-preview__meta span,
+.scorecard-rater-strip span {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-neutral-soft);
+  padding: 3px 10px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.scorecard-preview__fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.scorecard-preview__field {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.scorecard-preview__field span {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scorecard-preview__field strong {
+  flex: 0 0 auto;
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.scorecard-rater-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.scorecard-config-drawer .ant-drawer-body,
+.scorecard-preview-drawer .ant-drawer-body {
+  background: var(--color-bg);
+}
+
+.scorecard-config-drawer .ant-form-item {
+  margin-bottom: 0;
+}
+
+.scorecard-drawer-footer {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.scorecard-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.scorecard-form-grid__full {
+  grid-column: 1 / -1;
+}
+
+.scorecard-threshold-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.scorecard-threshold-grid .ant-input-number-group-wrapper,
+.scorecard-threshold-grid .ant-input-number {
+  width: 100%;
+}
+
+.scorecard-form-stack,
+.scorecard-form-list,
+.scorecard-standard-form-list {
+  display: grid;
+  gap: 12px;
+}
+
+.scorecard-form-block__header,
+.scorecard-content-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.scorecard-system-field-selector {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 14px;
+  align-items: start;
+}
+
+.scorecard-system-field-selector__available,
+.scorecard-system-field-selector__selected {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.scorecard-system-field-list,
+.scorecard-selected-field-list {
+  display: grid;
+  max-height: 360px;
+  overflow: auto;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.scorecard-system-field-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 52px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.scorecard-system-field-option--selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.scorecard-system-field-option span,
+.scorecard-selected-field-row__name {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.scorecard-system-field-option strong,
+.scorecard-selected-field-row__name strong {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 13px;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scorecard-system-field-option small,
+.scorecard-selected-field-row__name small {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scorecard-system-field-selector__title,
+.scorecard-selected-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.scorecard-system-field-selector__title {
+  min-height: 32px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.scorecard-system-field-selector__title strong {
+  color: var(--color-text);
+}
+
+.scorecard-selected-field-row {
+  min-height: 52px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-neutral-soft);
+  padding: 8px 10px;
+}
+
+.scorecard-selected-field-row__index {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.scorecard-selected-field-row__name {
+  flex: 1 1 auto;
+}
+
+.scorecard-form-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.scorecard-rater-form-row {
+  grid-template-columns: minmax(0, 1fr) 150px auto;
+}
+
+.scorecard-rater-form-row .ant-input-number-group-wrapper,
+.scorecard-standard-form-row .ant-input-number-group-wrapper {
+  width: 100%;
+}
+
+.scorecard-form-nested {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-neutral-soft);
+  padding: 12px;
+}
+
+.scorecard-dimension-name {
+  flex: 1;
+}
+
+.scorecard-standard-form-row {
+  grid-template-columns: minmax(0, 1fr) 140px auto;
+}
+
+@media (max-width: 1120px) {
+  .scorecard-two-column,
+  .scorecard-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scorecard-threshold-grid,
+  .scorecard-preview__fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .scorecard-field-row,
+  .scorecard-form-row,
+  .scorecard-rater-form-row,
+  .scorecard-standard-form-row,
+  .scorecard-threshold-grid,
+  .scorecard-preview__fields {
+    grid-template-columns: 1fr;
+  }
+
+  .scorecard-preview__header,
+  .scorecard-form-block__header,
+  .scorecard-content-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .scorecard-system-field-selector {
+    grid-template-columns: 1fr;
+  }
+}

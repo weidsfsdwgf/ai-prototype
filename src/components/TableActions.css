@@ -1,0 +1,31 @@
+.table-actions {
+  white-space: nowrap;
+}
+
+.table-actions .ant-btn {
+  height: 28px;
+  padding: 0 6px;
+}
+
+.table-actions .ant-btn-link {
+  color: var(--color-action-link);
+}
+
+.table-actions .ant-btn-link:not(:disabled):hover {
+  color: var(--color-action-link-hover) !important;
+}
+
+.table-actions .ant-btn-link.ant-btn-dangerous {
+  color: var(--color-danger);
+}
+
+.table-actions .ant-btn-link.ant-btn-dangerous:not(:disabled):hover {
+  color: var(--color-danger-hover) !important;
+}
+
+.table-actions__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-action-link);
+}
