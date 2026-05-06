@@ -587,7 +587,7 @@ export function ScorecardConfigPage() {
       key: "code",
       width: 180,
       fixed: "left",
-      render: (code: string) => code,
+      render: (code: string) => code || <span className="scorecard-code-placeholder">模板发布后生成</span>,
     },
     { title: "评分表名称", dataIndex: "name", key: "name", width: 190 },
     {

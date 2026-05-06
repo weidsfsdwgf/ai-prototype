@@ -8,7 +8,7 @@ export type OaDocumentResult = "处理中" | "已通过" | "已驳回" | "已撤
 export type OaApplicationField = {
   label: string;
   name: string;
-  kind: "input" | "textarea" | "select" | "dateRange" | "number" | "upload";
+  kind: "input" | "textarea" | "select" | "date" | "dateRange" | "number" | "upload";
   required?: boolean;
   options?: string[];
 };
@@ -77,6 +77,29 @@ export const oaApplicationTypes: OaApplicationType[] = [
       { label: "附件材料", name: "attachments", kind: "upload" },
     ],
     flowNodes: ["员工提交", "直属主管评价", "部门负责人审批", "HR 审核", "业务负责人确认", "回写员工状态"],
+  },
+  {
+    id: "resignation",
+    flowName: "离职申请",
+    category: "人事",
+    ownerDept: "人事部",
+    description: "员工本人提交离职申请，系统生成申请版本并触发行财政务风险确认待办。",
+    defaultSla: "3 个工作日",
+    approvalRule: "负责区域 SSC 会签 + 逐级部门主管",
+    status: "启用",
+    updatedAt: "2026-05-05 10:30",
+    formFields: [
+      { label: "离职日期", name: "resignationDate", kind: "date", required: true },
+      {
+        label: "离职原因",
+        name: "resignationReasons",
+        kind: "select",
+        required: true,
+        options: ["个人发展", "家庭原因", "薪酬福利", "工作地点", "职业规划", "其他"],
+      },
+      { label: "原因说明", name: "reasonDescription", kind: "textarea" },
+    ],
+    flowNodes: ["员工提交", "生成离职事件 / 申请版本", "行政风险确认", "财务风险确认", "逐级部门主管审批", "HR 确认离职", "回写离职管理"],
   },
   {
     id: "leave",

@@ -68,7 +68,6 @@ export function MyInitiatedApprovalsPage() {
       fixed: "right",
       render: (_, record) => (
         <TableActions
-          maxVisible={2}
           actions={[
             { key: "detail", label: "详情", onClick: () => setDetailRecord(record) },
             ...(record.status === "进行中"

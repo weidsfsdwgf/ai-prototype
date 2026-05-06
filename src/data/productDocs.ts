@@ -64,11 +64,18 @@ export const productMenuDocs: ProductMenuDoc[] = [
     updatedAt: "2026-05-04",
   },
   {
+    menu: "离职管理",
+    route: "/oa/hr/resignations",
+    documentPath: "docs/product/oa/hr/resignation-management.md",
+    status: "持续迭代",
+    updatedAt: "2026-05-05",
+  },
+  {
     menu: "OA申请",
     route: "/oa/approval/applications",
     documentPath: "docs/product/oa/approval-management/oa-application.md",
     status: "持续迭代",
-    updatedAt: "2026-05-04",
+    updatedAt: "2026-05-05",
   },
   {
     menu: "审批办理",
@@ -83,6 +90,13 @@ export const productMenuDocs: ProductMenuDoc[] = [
     documentPath: "docs/product/oa/approval-management/my-initiated.md",
     status: "持续迭代",
     updatedAt: "2026-04-30",
+  },
+  {
+    menu: "待办任务",
+    route: "/oa/approval/todos",
+    documentPath: "docs/product/oa/approval-management/todo-tasks.md",
+    status: "持续迭代",
+    updatedAt: "2026-05-05",
   },
   {
     menu: "低值易耗品",

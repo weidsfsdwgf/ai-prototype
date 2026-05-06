@@ -12,13 +12,14 @@ export type TableActionItem = {
 
 type TableActionsProps = {
   actions: TableActionItem[];
-  maxVisible?: number;
 };
 
-export function TableActions({ actions, maxVisible = 1 }: TableActionsProps) {
-  const shouldFold = actions.length >= 2;
-  const visibleActions = shouldFold ? actions.slice(0, maxVisible) : actions;
-  const foldedActions = shouldFold ? actions.slice(maxVisible) : [];
+const visibleActionLimit = 2;
+
+export function TableActions({ actions }: TableActionsProps) {
+  const shouldFold = actions.length > visibleActionLimit;
+  const visibleActions = shouldFold ? actions.slice(0, visibleActionLimit) : actions;
+  const foldedActions = shouldFold ? actions.slice(visibleActionLimit) : [];
   const menuItems: MenuProps["items"] = foldedActions.map((action) => ({
     key: action.key,
     label: action.label,

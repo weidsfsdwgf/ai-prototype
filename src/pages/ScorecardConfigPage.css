@@ -2,6 +2,10 @@
   background: var(--color-primary-soft) !important;
 }
 
+.scorecard-code-placeholder {
+  color: var(--color-text-secondary);
+}
+
 .scorecard-workbench-tabs .ant-tabs-content-holder {
   min-height: 240px;
 }

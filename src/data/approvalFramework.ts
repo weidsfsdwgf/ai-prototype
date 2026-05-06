@@ -13,6 +13,28 @@ export type ApprovalRecord = {
   createdAt: string;
   currentNode: string;
   handleType: ApprovalHandleType;
+  resignationInfo?: {
+    name: string;
+    area: string;
+    department: string;
+    position: string;
+    rank: string;
+    hireDate: string;
+    resignationDate: string;
+    resignationType: string;
+    resignationReasons: string[];
+    reasonDescription: string;
+  };
+  riskConfirmations?: Array<{
+    role: string;
+    conclusion: "待确认" | "无风险" | "有风险" | "已作废";
+    handledAt?: string;
+    documentNo: string;
+    matter: string;
+    requiredAction: string;
+    confirmationDetail: string;
+    remark: string;
+  }>;
 };
 
 export type MyInitiatedApprovalRecord = {

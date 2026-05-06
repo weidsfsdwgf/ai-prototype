@@ -56,6 +56,16 @@ import {
   type RegularizationApplicationRecord,
   type RegularizationApplicationStatus,
 } from "../data/probationManagement";
+import {
+  resignationApplicationRecords,
+  resignationAreaOptions,
+  resignationDepartmentOptions,
+  resignationHrOptions,
+  resignationReasonOptions,
+  toResignationApprovalRecord,
+  type ResignationApplicationRecord,
+  type ResignationApplicationStatus,
+} from "../data/resignationManagement";
 import "./ApprovalPages.css";
 import "./OaApplicationPage.css";
 import "./Page.css";
@@ -79,6 +89,13 @@ const documentResultColor: Record<OaDocumentResult, string> = {
 };
 
 const regularizationStatusColor: Record<RegularizationApplicationStatus, string> = {
+  审批中: "blue",
+  已通过: "green",
+  已驳回: "red",
+  已撤销: "default",
+};
+
+const resignationStatusColor: Record<ResignationApplicationStatus, string> = {
   审批中: "blue",
   已通过: "green",
   已驳回: "red",
@@ -153,10 +170,13 @@ function renderFormControl(field: OaApplicationField) {
     case "select":
       return (
         <Select
+          mode={field.name === "resignationReasons" ? "multiple" : undefined}
           placeholder={`请选择${field.label}`}
           options={(field.options ?? []).map((item) => ({ value: item, label: item }))}
         />
       );
+    case "date":
+      return <DatePicker style={{ width: "100%" }} placeholder={`请选择${field.label}`} />;
     case "dateRange":
       return <DatePicker.RangePicker style={{ width: "100%" }} />;
     case "number":
@@ -182,7 +202,7 @@ function ApplicationFormDrawer({
 }: {
   application?: OaApplicationType;
   onClose: () => void;
-  onSubmit: (application: OaApplicationType) => void;
+  onSubmit: (application: OaApplicationType, values: Record<string, unknown>) => void;
 }) {
   const [form] = Form.useForm();
 
@@ -200,8 +220,8 @@ function ApplicationFormDrawer({
                 return;
               }
 
-              await form.validateFields();
-              onSubmit(application);
+              const values = await form.validateFields();
+              onSubmit(application, values);
               form.resetFields();
             }}
           >
@@ -344,6 +364,7 @@ function LaunchApplications({
 function ApplicationRecords({
   records,
   regularizationRecords,
+  resignationRecords,
   selectedFlowName,
   expandedCategories,
   onToggleCategory,
@@ -351,9 +372,11 @@ function ApplicationRecords({
   onViewDetail,
   onRevoke,
   onRevokeRegularization,
+  onRevokeResignation,
 }: {
   records: OaApplicationRecord[];
   regularizationRecords: RegularizationApplicationRecord[];
+  resignationRecords: ResignationApplicationRecord[];
   selectedFlowName?: string;
   expandedCategories: OaApplicationCategory[];
   onToggleCategory: (category: OaApplicationCategory) => void;
@@ -361,6 +384,7 @@ function ApplicationRecords({
   onViewDetail: (record: ApprovalRecord) => void;
   onRevoke: (record: OaApplicationRecord) => void;
   onRevokeRegularization: (record: RegularizationApplicationRecord) => void;
+  onRevokeResignation: (record: ResignationApplicationRecord) => void;
 }) {
   const selectedApplication = oaApplicationTypes.find((application) => application.flowName === selectedFlowName);
   const genericVisibleRecords = selectedFlowName ? records.filter((record) => record.flowName === selectedFlowName) : [];
@@ -405,10 +429,55 @@ function ApplicationRecords({
       fixed: "right",
       render: (_, record) => (
         <TableActions
-          maxVisible={2}
           actions={[
             { key: "detail", label: "详情", onClick: () => onViewDetail(toRegularizationApprovalRecord(record)) },
             ...(record.status === "审批中" ? [{ key: "revoke", label: "撤销", danger: true, onClick: () => onRevokeRegularization(record) }] : []),
+          ]}
+        />
+      ),
+    },
+  ];
+
+  const resignationColumns: ColumnsType<ResignationApplicationRecord> = [
+    {
+      title: "序号",
+      key: "index",
+      width: 70,
+      fixed: "left",
+      align: "center",
+      render: (_value, _record, index) => index + 1,
+    },
+    { title: "员工编号", dataIndex: "employeeNo", key: "employeeNo", width: 120, fixed: "left" },
+    { title: "姓名", dataIndex: "name", key: "name", width: 100, fixed: "left" },
+    { title: "区域", dataIndex: "area", key: "area", width: 90 },
+    { title: "部门", dataIndex: "department", key: "department", width: 130 },
+    { title: "岗位-职级", key: "positionRank", width: 140, render: (_, record) => `${record.position}-${record.rank}` },
+    { title: "入职日期", dataIndex: "hireDate", key: "hireDate", width: 120 },
+    { title: "申请版本", dataIndex: "applicationVersion", key: "applicationVersion", width: 100 },
+    {
+      title: "状态",
+      dataIndex: "status",
+      key: "status",
+      width: 100,
+      render: (status: ResignationApplicationStatus) => <Tag color={resignationStatusColor[status]}>{status}</Tag>,
+    },
+    { title: "离职日期", dataIndex: "resignationDate", key: "resignationDate", width: 120 },
+    { title: "离职原因", dataIndex: "resignationReasons", key: "resignationReasons", width: 180, render: (value: string[]) => value.join("、") },
+    { title: "原因说明", dataIndex: "reasonDescription", key: "reasonDescription", width: 220, ellipsis: true },
+    { title: "手机号", dataIndex: "phone", key: "phone", width: 140 },
+    { title: "负责HR", dataIndex: "responsibleHr", key: "responsibleHr", width: 100 },
+    { title: "提交时间", dataIndex: "submitTime", key: "submitTime", width: 170 },
+    { title: "更新时间", dataIndex: "updatedAt", key: "updatedAt", width: 170 },
+    {
+      title: "操作",
+      key: "action",
+      width: 120,
+      fixed: "right",
+      render: (_, record) => (
+        <TableActions
+          actions={[
+            { key: "detail", label: "详情", onClick: () => onViewDetail(toResignationApprovalRecord(record)) },
+            ...(record.status === "审批中" ? [{ key: "revoke", label: "撤销", danger: true, onClick: () => onRevokeResignation(record) }] : []),
           ]}
         />
       ),
@@ -454,7 +523,6 @@ function ApplicationRecords({
       fixed: "right",
       render: (_, record) => (
         <TableActions
-          maxVisible={2}
           actions={[
             { key: "detail", label: "详情", onClick: () => onViewDetail(toApprovalRecord(record)) },
             ...(record.status === "进行中" ? [{ key: "revoke", label: "撤销", danger: true, onClick: () => onRevoke(record) }] : []),
@@ -598,6 +666,93 @@ function ApplicationRecords({
               />
             </SectionPanel>
           </>
+        ) : selectedFlowName === "离职申请" ? (
+          <>
+            <section className="filter-panel standard-list-filter" aria-label="离职申请数据查询区">
+              <Form layout="inline">
+                <Form.Item name="keyword">
+                  <Input allowClear placeholder="姓名、员工编号和手机号" className="standard-list-filter__keyword" />
+                </Form.Item>
+                <Form.Item name="area">
+                  <Select
+                    allowClear
+                    mode="multiple"
+                    maxTagCount="responsive"
+                    placeholder="区域"
+                    style={{ width: 160 }}
+                    options={resignationAreaOptions.map((item) => ({ value: item, label: item }))}
+                  />
+                </Form.Item>
+                <Form.Item name="department">
+                  <Select
+                    allowClear
+                    mode="multiple"
+                    maxTagCount="responsive"
+                    placeholder="部门"
+                    style={{ width: 170 }}
+                    options={resignationDepartmentOptions.map((item) => ({ value: item, label: item }))}
+                  />
+                </Form.Item>
+                <Form.Item name="status">
+                  <Select
+                    allowClear
+                    mode="multiple"
+                    maxTagCount="responsive"
+                    placeholder="状态"
+                    style={{ width: 160 }}
+                    options={Object.keys(resignationStatusColor).map((item) => ({ value: item, label: item }))}
+                  />
+                </Form.Item>
+                <Form.Item name="reason">
+                  <Select
+                    allowClear
+                    mode="multiple"
+                    maxTagCount="responsive"
+                    placeholder="离职原因"
+                    style={{ width: 170 }}
+                    options={resignationReasonOptions.map((item) => ({ value: item, label: item }))}
+                  />
+                </Form.Item>
+                <Form.Item name="responsibleHr">
+                  <Select
+                    allowClear
+                    mode="multiple"
+                    maxTagCount="responsive"
+                    placeholder="负责HR"
+                    style={{ width: 150 }}
+                    options={resignationHrOptions.map((item) => ({ value: item, label: item }))}
+                  />
+                </Form.Item>
+                <Form.Item name="resignationDate">
+                  <DatePicker.RangePicker placeholder={["离职开始", "离职结束"]} />
+                </Form.Item>
+                <Form.Item className="standard-list-filter__actions">
+                  <div className="standard-list-filter__action-row">
+                    <Space wrap className="standard-list-filter__query-actions">
+                      <Button type="primary" icon={<Search size={16} />}>
+                        查询
+                      </Button>
+                      <Button icon={<RotateCcw size={16} />}>重置</Button>
+                    </Space>
+                    <Space wrap className="standard-list-filter__business-actions">
+                      <Button className="standard-list-filter__utility-action" icon={<Download size={16} />}>
+                        导出
+                      </Button>
+                    </Space>
+                  </div>
+                </Form.Item>
+              </Form>
+            </section>
+            <SectionPanel>
+              <Table
+                columns={resignationColumns}
+                dataSource={resignationRecords}
+                pagination={{ current: 1, pageSize: 10, total: resignationRecords.length, showSizeChanger: true }}
+                rowKey="id"
+                scroll={{ x: "max-content" }}
+              />
+            </SectionPanel>
+          </>
         ) : (
           <>
             <section className="filter-panel standard-list-filter" aria-label={`${selectedFlowName}数据查询区`}>
@@ -660,12 +815,14 @@ export function OaApplicationPage() {
   const [activeTab, setActiveTab] = useState<MainTabKey>("launch");
   const [records, setRecords] = useState<OaApplicationRecord[]>(oaApplicationRecords);
   const [regularizationRecords, setRegularizationRecords] = useState<RegularizationApplicationRecord[]>(regularizationApplications);
+  const [resignationRecords, setResignationRecords] = useState<ResignationApplicationRecord[]>(resignationApplicationRecords);
   const [selectedFlowName, setSelectedFlowName] = useState<string>();
   const [expandedCategories, setExpandedCategories] = useState<OaApplicationCategory[]>(categoryOrder);
   const [activeApplication, setActiveApplication] = useState<OaApplicationType>();
   const [approvalDetailRecord, setApprovalDetailRecord] = useState<ApprovalRecord>();
   const [revokeRecord, setRevokeRecord] = useState<OaApplicationRecord>();
   const [revokeRegularizationRecord, setRevokeRegularizationRecord] = useState<RegularizationApplicationRecord>();
+  const [revokeResignationRecord, setRevokeResignationRecord] = useState<ResignationApplicationRecord>();
 
   const toggleCategory = (category: OaApplicationCategory) => {
     setExpandedCategories((current) =>
@@ -673,7 +830,54 @@ export function OaApplicationPage() {
     );
   };
 
-  const submitApplication = (application: OaApplicationType) => {
+  const submitApplication = (application: OaApplicationType, values: Record<string, unknown>) => {
+    if (application.flowName === "离职申请") {
+      const serial = resignationRecords.length + 1;
+      const resignationDate = dayjs.isDayjs(values.resignationDate)
+        ? values.resignationDate.format("YYYY-MM-DD")
+        : dayjs().add(14, "day").format("YYYY-MM-DD");
+      const resignationReasons = Array.isArray(values.resignationReasons)
+        ? values.resignationReasons.map(String)
+        : values.resignationReasons
+          ? [String(values.resignationReasons)]
+          : ["个人发展"];
+      const nextRecord: ResignationApplicationRecord = {
+        id: `RA-${Date.now()}`,
+        approvalNo: `HR-RES-${dayjs().format("YYYYMM")}-${String(serial).padStart(3, "0")}`,
+        employeeNo: "LS0024",
+        name: currentUserName,
+        area: "成都",
+        department: currentUserDepartment,
+        position: "会计",
+        rank: "P2",
+        hireDate: "2024-06-03",
+        status: "审批中",
+        resignationDate,
+        resignationType: "主动离职",
+        resignationReasons,
+        reasonDescription: typeof values.reasonDescription === "string" ? values.reasonDescription : "",
+        phone: "13800010024",
+        responsibleHr: "林珊",
+        submitTime: dayjs().format("YYYY-MM-DD HH:mm"),
+        updatedAt: dayjs().format("YYYY-MM-DD HH:mm"),
+        currentNode: "负责区域 SSC 会签",
+        applicationVersion: "V1",
+        riskResults: [
+          { role: "所属部门", conclusion: "待确认" },
+          { role: "行政部", conclusion: "待确认" },
+          { role: "人力资源部", conclusion: "待确认" },
+          { role: "财务部", conclusion: "待确认" },
+        ],
+      };
+
+      setResignationRecords((current) => [nextRecord, ...current]);
+      setActiveApplication(undefined);
+      setActiveTab("records");
+      setSelectedFlowName(application.flowName);
+      Modal.success({ title: "离职申请已提交", content: `已生成 ${nextRecord.approvalNo}，审批中数据会同步展示在离职管理待确认列表。` });
+      return;
+    }
+
     const serial = records.length + 1;
     const nextRecord: OaApplicationRecord = {
       id: `OA-${Date.now()}`,
@@ -739,6 +943,27 @@ export function OaApplicationPage() {
     setRevokeRegularizationRecord(undefined);
   };
 
+  const confirmResignationRevoke = () => {
+    if (!revokeResignationRecord) {
+      return;
+    }
+
+    setResignationRecords((current) =>
+      current.map((record) =>
+        record.id === revokeResignationRecord.id
+          ? {
+              ...record,
+              status: "已撤销",
+              currentNode: "流程结束",
+              updatedAt: dayjs().format("YYYY-MM-DD HH:mm"),
+              riskResults: record.riskResults.map((item) => ({ ...item, conclusion: "已作废" })),
+            }
+          : record,
+      ),
+    );
+    setRevokeResignationRecord(undefined);
+  };
+
   return (
     <main className="oa-application-page">
       <Tabs
@@ -757,6 +982,7 @@ export function OaApplicationPage() {
               <ApplicationRecords
                 records={records}
                 regularizationRecords={regularizationRecords}
+                resignationRecords={resignationRecords}
                 selectedFlowName={selectedFlowName}
                 expandedCategories={expandedCategories}
                 onToggleCategory={toggleCategory}
@@ -764,6 +990,7 @@ export function OaApplicationPage() {
                 onViewDetail={setApprovalDetailRecord}
                 onRevoke={setRevokeRecord}
                 onRevokeRegularization={setRevokeRegularizationRecord}
+                onRevokeResignation={setRevokeResignationRecord}
               />
             ),
           },
@@ -803,6 +1030,18 @@ export function OaApplicationPage() {
       >
         <p>
           确认撤销 <strong>{revokeRegularizationRecord?.approvalNo}</strong> 吗？撤销后本条申请状态将更新为“已撤销”。
+        </p>
+      </Modal>
+      <Modal
+        title="撤销离职申请"
+        open={Boolean(revokeResignationRecord)}
+        onCancel={() => setRevokeResignationRecord(undefined)}
+        onOk={confirmResignationRevoke}
+        okText="确认撤销"
+        okButtonProps={{ danger: true }}
+      >
+        <p>
+          确认撤销 <strong>{revokeResignationRecord?.approvalNo}</strong> 吗？仅申请本人可撤销当前离职申请。
         </p>
       </Modal>
     </main>

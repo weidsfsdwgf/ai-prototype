@@ -359,7 +359,6 @@ function FileSettingsModal({
       width: 140,
       render: (_, record) => (
         <TableActions
-          maxVisible={2}
           actions={[
             { key: "edit", label: "编辑", onClick: () => openEditor(record) },
             { key: "delete", label: "删除", danger: true, onClick: () => confirmDelete(record) },
@@ -680,7 +679,6 @@ export function ProbationManagementPage() {
       fixed: "right",
       render: (_, record) => (
         <TableActions
-          maxVisible={2}
           actions={[
             ...(!record.actualRegularDate && record.noticeStatus === "未通知"
               ? [

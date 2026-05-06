@@ -20,8 +20,13 @@
 | 用户组 | `/oa/system/groups` | `docs/product/oa/system-management/user-groups.md` | 已建立 |
 | 花名册 | `/oa/hr/roster` | `docs/product/oa/hr/roster.md` | 持续迭代 |
 | 组织架构 | `/oa/hr/org-structure` | `docs/product/oa/hr/org-structure.md` | 持续迭代 |
+| 转正管理 | `/oa/hr/probation` | `docs/product/oa/hr/probation-management.md` | 持续迭代 |
+| 离职管理 | `/oa/hr/resignations` | `docs/product/oa/hr/resignation-management.md` | 持续迭代 |
+| OA申请 | `/oa/approval/applications` | `docs/product/oa/approval-management/oa-application.md` | 持续迭代 |
 | 审批办理 | `/oa/approval/handling` | `docs/product/oa/approval-management/approval-handling.md` | 持续迭代 |
 | 我发起的 | `/oa/approval/initiated` | `docs/product/oa/approval-management/my-initiated.md` | 持续迭代 |
+| 待办任务 | `/oa/approval/todos` | `docs/product/oa/approval-management/todo-tasks.md` | 持续迭代 |
+| 低值易耗品 | `/oa/assets/low-value-consumables` | `docs/product/oa/asset-management/low-value-consumables.md` | 持续迭代 |
 | 评分表配置 | `/oa/config/scorecards` | `docs/product/oa/config-management/scorecard-config.md` | 持续迭代 |
 
 ## 文档结构

@@ -1,5 +1,5 @@
 import { Button, Descriptions, Drawer, Form, Input, Modal, Select, Space, Tag, Timeline } from "antd";
-import { Check, Maximize2, Minimize2, X } from "lucide-react";
+import { Check, CheckCircle2, Clock3, Maximize2, Minimize2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   approvalChain,
@@ -117,6 +117,87 @@ export function ApprovalDetailDrawer({
       ]
     : [];
 
+  const getCompletionStatus = (conclusion: NonNullable<ApprovalRecord["riskConfirmations"]>[number]["conclusion"]) => {
+    if (conclusion === "待确认") {
+      return { color: "gold", label: "待完成" };
+    }
+
+    if (conclusion === "已作废") {
+      return { color: "default", label: "已作废" };
+    }
+
+    if (conclusion === "有风险") {
+      return { color: "red", label: "未完成" };
+    }
+
+    return { color: "green", label: "已完成" };
+  };
+
+  const renderResignationApprovalInfo = (target: ApprovalRecord) => {
+    if (!target.resignationInfo) {
+      return null;
+    }
+
+    const riskConfirmations = target.riskConfirmations ?? [];
+    const completedCount = riskConfirmations.filter((item) => item.conclusion === "无风险" || item.conclusion === "有风险").length;
+    const pendingCount = riskConfirmations.filter((item) => item.conclusion === "待确认").length;
+
+    return (
+      <div className="approval-resignation-info">
+        <Descriptions
+          bordered
+          column={2}
+          items={[
+            { key: "name", label: "姓名", children: target.resignationInfo.name },
+            { key: "area", label: "区域", children: target.resignationInfo.area },
+            { key: "department", label: "部门", children: target.resignationInfo.department },
+            { key: "position", label: "岗位", children: target.resignationInfo.position },
+            { key: "rank", label: "职级", children: target.resignationInfo.rank },
+            { key: "hireDate", label: "入职日期", children: target.resignationInfo.hireDate },
+            { key: "resignationDate", label: "离职日期", children: target.resignationInfo.resignationDate },
+            { key: "resignationType", label: "离职类型", children: target.resignationInfo.resignationType },
+            { key: "resignationReasons", label: "离职原因", children: target.resignationInfo.resignationReasons.join("、") },
+            { key: "reasonDescription", label: "原因说明", children: target.resignationInfo.reasonDescription || "-" },
+          ]}
+        />
+        <div className="approval-resignation-matters">
+          <div className="approval-resignation-matters__header">
+            <div>
+              <h3>离职事项</h3>
+              <p>离职事项与审批并行推进，审批人可在这里查看需要完成的事项和完成情况。</p>
+            </div>
+            <div className="approval-resignation-matters__summary">
+              <span>
+                <CheckCircle2 size={16} />
+                {completedCount}/{riskConfirmations.length} 已完成
+              </span>
+              <span>
+                <Clock3 size={16} />
+                {pendingCount} 待确认
+              </span>
+            </div>
+          </div>
+          <div className="approval-resignation-matter-list">
+            {riskConfirmations.map((item) => {
+              const status = getCompletionStatus(item.conclusion);
+
+              return (
+                <div className="approval-resignation-matter-row" key={item.documentNo}>
+                  <div className="approval-resignation-matter-row__main">
+                    <strong>{item.matter}</strong>
+                    <span>{item.role}</span>
+                  </div>
+                  <p>{item.confirmationDetail}</p>
+                  <Tag color={status.color}>{status.label}</Tag>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Drawer
       className="approval-drawer"
@@ -166,7 +247,7 @@ export function ApprovalDetailDrawer({
       {record ? (
         <div className="approval-drawer__content">
           <SectionPanel title="审批信息">
-            <Descriptions bordered column={2} items={descriptionItems} />
+            {record.resignationInfo ? renderResignationApprovalInfo(record) : <Descriptions bordered column={2} items={descriptionItems} />}
           </SectionPanel>
           <SectionPanel title="审批链路">
             <Timeline

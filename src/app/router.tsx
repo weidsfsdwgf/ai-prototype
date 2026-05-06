@@ -8,8 +8,10 @@ import { MyInitiatedApprovalsPage } from "../pages/MyInitiatedApprovalsPage";
 import { OaApplicationPage } from "../pages/OaApplicationPage";
 import { OrgStructurePage } from "../pages/OrgStructurePage";
 import { ProbationManagementPage } from "../pages/ProbationManagementPage";
+import { ResignationManagementPage } from "../pages/ResignationManagementPage";
 import { RosterPage } from "../pages/RosterPage";
 import { ScorecardConfigPage } from "../pages/ScorecardConfigPage";
+import { TodoTasksPage } from "../pages/TodoTasksPage";
 import { UserManagementPage } from "../pages/UserManagementPage";
 import { StandardConfigPage } from "../pages/standards/StandardConfigPage";
 import { StandardDetailPage } from "../pages/standards/StandardDetailPage";
@@ -33,9 +35,11 @@ export const router = createBrowserRouter([
       { path: "oa/hr/roster", element: <RosterPage /> },
       { path: "oa/hr/org-structure", element: <OrgStructurePage /> },
       { path: "oa/hr/probation", element: <ProbationManagementPage /> },
+      { path: "oa/hr/resignations", element: <ResignationManagementPage /> },
       { path: "oa/approval/applications", element: <OaApplicationPage /> },
       { path: "oa/approval/handling", element: <ApprovalHandlingPage /> },
       { path: "oa/approval/initiated", element: <MyInitiatedApprovalsPage /> },
+      { path: "oa/approval/todos", element: <TodoTasksPage /> },
       { path: "oa/assets/low-value-consumables", element: <LowValueConsumablesPage /> },
       { path: "oa/config/scorecards", element: <ScorecardConfigPage /> },
       { path: "standards", element: <StandardsOverviewPage /> },
