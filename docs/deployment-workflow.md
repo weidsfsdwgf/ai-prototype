@@ -38,3 +38,26 @@ When the user asks to publish the latest prototype update, treat this file as th
 2. Run the production build before publishing.
 3. Commit the relevant changes with a concise message.
 4. Push to `origin/main` so Vercel deploys the update.
+
+## GitHub Push Troubleshooting
+
+If normal network checks pass but Git still cannot push to GitHub, inspect Git's TLS backend before assuming the internet connection is down.
+
+Known local issue:
+
+```text
+schannel: AcquireCredentialsHandle failed: SEC_E_NO_CREDENTIALS (0x8009030E)
+```
+
+This can happen when Git for Windows uses the Windows `schannel` TLS backend. In this project, use OpenSSL for GitHub operations:
+
+```powershell
+git -c http.sslBackend=openssl ls-remote origin refs/heads/main
+git -c http.sslBackend=openssl push
+```
+
+If that works, persist it for this repository:
+
+```powershell
+git config --local http.sslBackend openssl
+```
