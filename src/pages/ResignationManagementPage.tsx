@@ -458,7 +458,7 @@ export function ResignationManagementPage() {
     {
       title: "事项确认",
       key: "confirmationProgress",
-      width: 130,
+      width: 110,
       render: (_, record) => (
         <ResignationConfirmationProgress
           record={record}

@@ -71,6 +71,13 @@ export const productMenuDocs: ProductMenuDoc[] = [
     updatedAt: "2026-05-05",
   },
   {
+    menu: "绩效管理",
+    route: "/oa/hr/performance",
+    documentPath: "docs/product/oa/hr/performance-management.md",
+    status: "持续迭代",
+    updatedAt: "2026-05-08",
+  },
+  {
     menu: "OA申请",
     route: "/oa/approval/applications",
     documentPath: "docs/product/oa/approval-management/oa-application.md",

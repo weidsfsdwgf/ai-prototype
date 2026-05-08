@@ -1,5 +1,5 @@
 export type TodoTaskStatus = "pending" | "handled";
-export type TodoTaskKind = "normal" | "resignationRiskConfirmation";
+export type TodoTaskKind = "normal" | "resignationRiskConfirmation" | "performanceSelfEvaluation" | "performanceReview";
 export type ResignationRiskRole = "行政部" | "财务部" | "所属部门" | "人力资源部" | "当事人";
 
 export type ResignationRiskChecklistItem = {
@@ -30,6 +30,7 @@ export type TodoTask = {
   riskRole?: ResignationRiskRole;
   riskItems?: ResignationRiskChecklistItem[];
   riskConclusion?: "无风险" | "有风险" | "待确认";
+  targetPath?: string;
 };
 
 export const currentTodoUser = "陈嘉";
@@ -56,6 +57,18 @@ export function getResignationMatterAssignee(
 }
 
 export const todoTasks: TodoTask[] = [
+  {
+    id: "TODO-PERF-1001",
+    kind: "performanceReview",
+    title: "绩效评价：林珊 / 2026-05",
+    creator: "系统",
+    assignees: [{ name: currentTodoUser, status: "pending" }],
+    createdAt: "2026-05-01 08:05",
+    deadline: "2026-05-08 18:00",
+    description: "请进入绩效详情完成上级评价。提交后系统将完成评价待办，并流转到绩效确认。",
+    sourceDocumentNo: "PERF-202605-002",
+    targetPath: "/oa/hr/performance?record=PERF-202605-002",
+  },
   {
     id: "TODO-RES-1001",
     kind: "resignationRiskConfirmation",

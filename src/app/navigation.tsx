@@ -108,6 +108,12 @@ export const navigationItems: NavigationItem[] = [
             path: "/oa/hr/resignations",
             icon: <LogOut size={18} />,
           },
+          {
+            key: "oa-hr-performance",
+            label: "绩效管理",
+            path: "/oa/hr/performance",
+            icon: <ListChecks size={18} />,
+          },
         ],
       },
       {

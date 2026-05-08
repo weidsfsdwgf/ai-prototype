@@ -7,6 +7,7 @@ import { LowValueConsumablesPage } from "../pages/LowValueConsumablesPage";
 import { MyInitiatedApprovalsPage } from "../pages/MyInitiatedApprovalsPage";
 import { OaApplicationPage } from "../pages/OaApplicationPage";
 import { OrgStructurePage } from "../pages/OrgStructurePage";
+import { PerformanceManagementPage } from "../pages/PerformanceManagementPage";
 import { ProbationManagementPage } from "../pages/ProbationManagementPage";
 import { ResignationManagementPage } from "../pages/ResignationManagementPage";
 import { RosterPage } from "../pages/RosterPage";
@@ -36,6 +37,7 @@ export const router = createBrowserRouter([
       { path: "oa/hr/org-structure", element: <OrgStructurePage /> },
       { path: "oa/hr/probation", element: <ProbationManagementPage /> },
       { path: "oa/hr/resignations", element: <ResignationManagementPage /> },
+      { path: "oa/hr/performance", element: <PerformanceManagementPage /> },
       { path: "oa/approval/applications", element: <OaApplicationPage /> },
       { path: "oa/approval/handling", element: <ApprovalHandlingPage /> },
       { path: "oa/approval/initiated", element: <MyInitiatedApprovalsPage /> },

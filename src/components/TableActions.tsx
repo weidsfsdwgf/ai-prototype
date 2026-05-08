@@ -14,10 +14,10 @@ type TableActionsProps = {
   actions: TableActionItem[];
 };
 
-const visibleActionLimit = 2;
+const visibleActionLimit = 1;
 
 export function TableActions({ actions }: TableActionsProps) {
-  const shouldFold = actions.length > visibleActionLimit;
+  const shouldFold = actions.length >= 3;
   const visibleActions = shouldFold ? actions.slice(0, visibleActionLimit) : actions;
   const foldedActions = shouldFold ? actions.slice(visibleActionLimit) : [];
   const menuItems: MenuProps["items"] = foldedActions.map((action) => ({

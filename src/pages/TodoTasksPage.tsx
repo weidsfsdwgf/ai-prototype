@@ -2,6 +2,7 @@ import { Button, Descriptions, Drawer, Empty, Form, Input, Modal, Popover, Radio
 import dayjs from "dayjs";
 import { Check, Maximize2, Minimize2 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { SectionPanel } from "../components/SectionPanel";
 import { currentTodoUser, todoTasks, type TodoTask, type TodoTaskAssignee, type TodoTaskStatus } from "../data/todoTasks";
 import "./ApprovalPages.css";
@@ -133,10 +134,15 @@ function TodoTaskList({
                 icon={<Check size={16} />}
                 onClick={(event) => {
                   event.stopPropagation();
+                  if (record.targetPath) {
+                    onOpenDetail(record);
+                    return;
+                  }
+
                   onComplete(record);
                 }}
               >
-                {record.kind === "resignationRiskConfirmation" ? "处理待办" : "完成待办"}
+                {record.kind === "resignationRiskConfirmation" || record.targetPath ? "处理待办" : "完成待办"}
               </Button>
             </div>
           ) : canDelete ? (
@@ -309,6 +315,7 @@ function ResignationRiskConfirmModal({
 }
 
 export function TodoTasksPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TodoTabKey>("pending");
   const [records, setRecords] = useState<TodoTask[]>(todoTasks);
   const [detailRecord, setDetailRecord] = useState<TodoTask>();
@@ -354,6 +361,11 @@ export function TodoTasksPage() {
   };
 
   const openTodo = (record: TodoTask) => {
+    if (record.targetPath) {
+      navigate(record.targetPath);
+      return;
+    }
+
     if (record.kind === "resignationRiskConfirmation") {
       setRiskRecord(record);
       return;
