@@ -362,6 +362,42 @@
   min-width: 0;
 }
 
+.payroll-department-flat-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+}
+
+.payroll-department-flat-layout__tree {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-neutral-soft);
+}
+
+.payroll-department-flat-layout__tree .ant-tree {
+  background: transparent;
+}
+
+.payroll-department-flat-layout__tree .ant-tree-node-content-wrapper {
+  min-width: 0;
+}
+
+.payroll-department-flat-layout__tree .ant-tree-title {
+  display: inline-block;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+.payroll-department-flat-layout__table {
+  min-width: 0;
+}
+
 .payroll-employee-layout__tree {
   display: grid;
   align-content: start;
@@ -448,20 +484,53 @@
 
 .payroll-employee-modal__content {
   display: grid;
-  gap: 10px;
+  gap: 8px;
+}
+
+.payroll-employee-modal__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  align-items: start;
 }
 
 .payroll-employee-modal .ant-descriptions-title {
-  margin-bottom: 6px;
-  font-size: 14px;
-  line-height: 20px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  line-height: 18px;
 }
 
 .payroll-employee-modal .ant-descriptions-small .ant-descriptions-item-label,
 .payroll-employee-modal .ant-descriptions-small .ant-descriptions-item-content {
-  padding: 5px 8px;
+  padding: 3px 6px;
   font-size: 12px;
-  line-height: 18px;
+  line-height: 17px;
+}
+
+.payroll-employee-modal .ant-descriptions-item-label {
+  width: 74px;
+}
+
+.payroll-employee-modal .payroll-detail-list {
+  grid-template-columns: 1fr;
+  gap: 3px;
+  min-width: 0;
+}
+
+.payroll-employee-modal .payroll-detail-list dt,
+.payroll-employee-modal .payroll-detail-list dd {
+  display: inline;
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.payroll-employee-modal .payroll-detail-list dt::after {
+  content: "：";
+}
+
+.payroll-employee-modal .payroll-detail-list dd {
+  margin-left: 0;
+  font-weight: 500;
 }
 
 .payroll-employee-modal__edit {
@@ -469,14 +538,14 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  padding: 8px;
+  padding: 6px 8px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: var(--color-surface);
 }
 
 .payroll-employee-modal__edit .ant-input {
-  width: 320px;
+  width: 300px;
 }
 
 .payroll-approval .ant-input-number {
@@ -508,6 +577,10 @@
   }
 
   .payroll-employee-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .payroll-department-flat-layout {
     grid-template-columns: 1fr;
   }
 

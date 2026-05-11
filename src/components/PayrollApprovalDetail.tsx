@@ -15,6 +15,7 @@ import {
 import type { ColumnsType, FilterValue } from "antd/es/table/interface";
 import type { DataNode } from "antd/es/tree";
 import { Building2, RotateCcw, UserRound } from "lucide-react";
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type {
   PayrollApprovalInfo,
@@ -353,6 +354,20 @@ function buildEmployeeTreeData(
     }, []);
 }
 
+function buildDepartmentTreeData(departments: PayrollDepartmentRecord[], employees: PayrollEmployeeRecord[]): DataNode[] {
+  return departments.map((department) => ({
+    key: makeDepartmentKey(department.name),
+    title: (
+      <span className="payroll-tree-title">
+        <span>{department.name}</span>
+        <span className="payroll-tree-count">({countDepartmentEmployees(department, employees)})</span>
+      </span>
+    ),
+    icon: <DepartmentIcon />,
+    children: department.children ? buildDepartmentTreeData(department.children, employees) : undefined,
+  }));
+}
+
 function toFlatDepartmentRecord(department: PayrollDepartmentRecord): PayrollDepartmentRecord {
   const { children: _children, ...flatDepartment } = department;
 
@@ -368,73 +383,15 @@ function countDepartmentEmployees(department: PayrollDepartmentRecord, employees
   return employees.filter((employee) => departmentScope.has(employee.department)).length;
 }
 
-function buildEmployeeDetailItems(record: PayrollEmployeeRecord, editableFields: EditableFields) {
-  const editable = editableFields[record.id] ?? {
-    remark: record.remark,
-    auditAdjustment: record.auditAdjustment,
-  };
-
-  return {
-    basic: [
-      { key: "name", label: "姓名", children: record.name },
-      { key: "area", label: "区域", children: record.area },
-      { key: "department", label: "部门", children: record.department },
-      { key: "position", label: "岗位", children: record.position },
-      { key: "rank", label: "职级", children: record.rank },
-      { key: "hireDate", label: "入职日期", children: record.hireDate },
-      { key: "regularDate", label: "转正日期", children: record.regularDate },
-      { key: "resignationDate", label: "离职日期", children: record.resignationDate ?? "-" },
-      { key: "salaryStructure", label: "薪资结构", children: record.salaryStructure },
-    ],
-    attendance: [
-      { key: "expectedAttendance", label: "应出勤天数", children: formatNumber(record.expectedAttendance) },
-      { key: "actualAttendance", label: "实出勤天数", children: formatNumber(record.actualAttendance) },
-      { key: "leaveDays", label: "请假天数", children: detailList(record.leaveDetails) },
-      { key: "lateCount", label: "迟到次数", children: record.lateCount },
-      { key: "clockRepairCount", label: "补卡次数", children: record.clockRepairCount },
-      { key: "overtime", label: "加班", children: detailList(record.overtimeDetails) },
-    ],
-    kpi: [
-      { key: "kpiSalary", label: "KPI 工资", children: record.kpiDetails[0]?.value ?? "-" },
-      { key: "kpiScore", label: "KPI 分数", children: record.kpiDetails[1]?.value ?? "-" },
-      { key: "kpiPaid", label: "实发 KPI", children: formatMoney(record.kpiPaid) },
-    ],
-    commission: [
-      { key: "commissionPaid", label: "实发提成", children: formatMoney(record.commissionPaid) },
-      { key: "remainingCommission", label: "剩余提成", children: formatMoney(record.remainingCommission) },
-      ...record.commissionDetails.map((item) => ({
-        key: item.label,
-        label: item.label,
-        children: item.value,
-      })),
-    ],
-    bonus: record.bonusDetails.map((item) => ({
-      key: item.label,
-      label: item.label,
-      children: item.value,
-    })),
-    comprehensiveSubsidy: record.comprehensiveSubsidyDetails.map((item) => ({
-      key: item.label,
-      label: item.label,
-      children: item.value,
-    })),
-    settlement: [
-      { key: "remark", label: "备注", children: editable.remark || "-" },
-      { key: "auditAdjustment", label: "审核调整", children: formatMoney(editable.auditAdjustment) },
-      { key: "payableSalary", label: "应付工资", children: formatMoney(record.payableSalary) },
-      {
-        key: "actualSalary",
-        label: "实付工资",
-        children: formatMoney(getEmployeeActualSalary(record, editableFields)),
-      },
-    ],
-  };
+function makeDescriptionItem(key: string, label: string, children: ReactNode) {
+  return { key, label, children };
 }
 
 export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
   const [activeView, setActiveView] = useState<PayrollView>("department");
   const [departmentView, setDepartmentView] = useState<DepartmentView>("tree");
   const [visibleLevels, setVisibleLevels] = useState<LevelFilterValue[]>([]);
+  const [flatDepartmentKeys, setFlatDepartmentKeys] = useState<TreeFilterKey[]>([]);
   const [expandedDepartmentRowKeys, setExpandedDepartmentRowKeys] = useState<string[]>(() =>
     flattenDepartments(info.departments).map((department) => department.id),
   );
@@ -1383,9 +1340,81 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
     </Table.Summary.Row>
   );
 
-  const employeeDetailItems = employeeDetail ? buildEmployeeDetailItems(employeeDetail, editableFields) : undefined;
+  const employeeDetailEditable = employeeDetail
+    ? (editableFields[employeeDetail.id] ?? {
+        remark: employeeDetail.remark,
+        auditAdjustment: employeeDetail.auditAdjustment,
+      })
+    : undefined;
+  const employeeDetailItems = employeeDetail
+    ? {
+        basic: [
+          makeDescriptionItem("name", "姓名", employeeDetail.name),
+          makeDescriptionItem("area", "区域", employeeDetail.area),
+          makeDescriptionItem("department", "部门", employeeDetail.department),
+          makeDescriptionItem("position", "岗位", employeeDetail.position),
+          makeDescriptionItem("rank", "职级", employeeDetail.rank),
+          makeDescriptionItem("hireDate", "入职日期", employeeDetail.hireDate),
+          makeDescriptionItem("regularDate", "转正日期", employeeDetail.regularDate || "-"),
+          makeDescriptionItem("expectedRegularDate", "预计转正日期", employeeDetail.expectedRegularDate ?? "-"),
+          makeDescriptionItem("resignationDate", "离职日期", employeeDetail.resignationDate ?? "-"),
+        ],
+        salary: [
+          makeDescriptionItem("salaryTotal", "薪资合计", formatMoney(employeeDetail.salaryTotal)),
+          makeDescriptionItem("salaryStructure", "薪资结构", employeeDetail.salaryStructure),
+          makeDescriptionItem("payableSalary", "应付工资", formatMoney(employeeDetail.payableSalary)),
+          makeDescriptionItem(
+            "actualSalary",
+            "实付工资",
+            formatMoney(getEmployeeActualSalary(employeeDetail, editableFields)),
+          ),
+          makeDescriptionItem("auditAdjustment", "审核调整", formatMoney(employeeDetailEditable?.auditAdjustment ?? 0)),
+          makeDescriptionItem("previousMonthDiff", "上月薪资差额", formatMoney(employeeDetail.previousMonthDiff)),
+        ],
+        attendance: [
+          makeDescriptionItem("expectedAttendance", "应出勤", formatNumber(employeeDetail.expectedAttendance)),
+          makeDescriptionItem("actualAttendance", "实出勤", formatNumber(employeeDetail.actualAttendance)),
+          makeDescriptionItem("leaveDays", "请假", detailList(employeeDetail.leaveDetails)),
+          makeDescriptionItem("lateCount", "迟到", employeeDetail.lateCount),
+          makeDescriptionItem("clockRepairCount", "补卡", employeeDetail.clockRepairCount),
+          makeDescriptionItem("overtime", "加班", detailList(getOvertimeDetails(employeeDetail))),
+          makeDescriptionItem("attendanceSubsidy", "假勤补贴", detailList(getAttendanceSubsidyDetails(employeeDetail))),
+          makeDescriptionItem("attendanceDeduction", "考勤扣款", formatMoney(employeeDetail.attendanceDeduction)),
+        ],
+        performance: [
+          makeDescriptionItem("kpiSalary", "KPI工资", getDetailValue(employeeDetail.kpiDetails, "KPI 工资")),
+          makeDescriptionItem("kpiScore", "KPI分数", getDetailValue(employeeDetail.kpiDetails, "KPI 分数")),
+          makeDescriptionItem("kpiPaid", "实发KPI", formatMoney(employeeDetail.kpiPaid)),
+          makeDescriptionItem("commissionPaid", "实发提成", detailList(getCommissionPaidDetails(employeeDetail))),
+          makeDescriptionItem("remainingCommission", "剩余提成", detailList(getRemainingCommissionDetails(employeeDetail))),
+        ],
+        allowance: [
+          makeDescriptionItem("comprehensiveSubsidy", "综合补贴", detailList(getComprehensiveSubsidyDetails(employeeDetail))),
+          makeDescriptionItem("bonus", "奖金", detailList(filterNonZeroDetails(getBonusDetails(employeeDetail)))),
+          makeDescriptionItem("welfareSubsidy", "福利补贴", detailList(filterNonZeroDetails(getWelfareSubsidyDetails(employeeDetail)))),
+          makeDescriptionItem("otherDeduction", "其余扣款", detailList(getOtherDeductionDetails(employeeDetail))),
+          makeDescriptionItem("withholdingDeduction", "代扣扣款", detailList(employeeDetail.withholdingDeductionDetails)),
+        ],
+        settlement: [
+          makeDescriptionItem("remark", "备注", employeeDetailEditable?.remark || "-"),
+          makeDescriptionItem("auditAdjustment", "审核调整", formatMoney(employeeDetailEditable?.auditAdjustment ?? 0)),
+          makeDescriptionItem("payableSalary", "应付工资", formatMoney(employeeDetail.payableSalary)),
+          makeDescriptionItem(
+            "actualSalary",
+            "实付工资",
+            formatMoney(getEmployeeActualSalary(employeeDetail, editableFields)),
+          ),
+        ],
+      }
+    : undefined;
   const levelFilteredDepartments =
     visibleLevels.length === 0 ? departments : departments.filter((department) => visibleLevels.includes(department.level));
+  const flatSelectedDepartmentNames = flatDepartmentKeys
+    .map(parseDepartmentKey)
+    .filter((name): name is string => Boolean(name));
+  const flatDepartments = levelFilteredDepartments.filter(
+    (department) => flatSelectedDepartmentNames.length === 0 || flatSelectedDepartmentNames.includes(department.name),
+  );
 
   return (
     <div className="payroll-approval">
@@ -1441,38 +1470,64 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
               </div>
             ) : null}
           </div>
-          <Table
-            columns={departmentColumns}
-            dataSource={
-              departmentView === "tree" ? info.departments : levelFilteredDepartments.map(toFlatDepartmentRecord)
-            }
-            expandable={
-              departmentView === "tree"
-                ? {
-                    expandedRowKeys: expandedDepartmentRowKeys,
-                    expandIcon: ({ expanded, onExpand, record }) =>
-                      record.children?.length ? (
-                        <button
-                          className="payroll-tree-expand"
-                          type="button"
-                          aria-label={expanded ? "收起部门" : "展开部门"}
-                          onClick={(event) => onExpand(record, event)}
-                        >
-                          {expanded ? "▼" : "▶"}
-                        </button>
-                      ) : (
-                        <span className="payroll-tree-expand payroll-tree-expand--empty" />
-                      ),
-                    onExpandedRowsChange: (keys) => setExpandedDepartmentRowKeys(keys.map((key) => String(key))),
-                  }
-                : undefined
-            }
-            pagination={false}
-            rowKey="id"
-            size="small"
-            scroll={{ x: 1630, y: 520 }}
-            onChange={(_, filters) => setDepartmentFilteredInfo(filters)}
-          />
+          {departmentView === "flat" ? (
+            <div className="payroll-department-flat-layout">
+              <aside className="payroll-department-flat-layout__tree">
+                <Tree
+                  checkable
+                  showIcon
+                  defaultExpandAll
+                  checkedKeys={flatDepartmentKeys}
+                  selectedKeys={flatDepartmentKeys}
+                  treeData={buildDepartmentTreeData(info.departments, info.employees)}
+                  onCheck={(keys) => {
+                    const checkedKeys = Array.isArray(keys) ? keys : [];
+                    setFlatDepartmentKeys(
+                      checkedKeys.map((key) => String(key)).filter((key) => departmentKeys.has(key)),
+                    );
+                  }}
+                />
+              </aside>
+              <div className="payroll-department-flat-layout__table">
+                <Table
+                  columns={departmentColumns}
+                  dataSource={flatDepartments.map(toFlatDepartmentRecord)}
+                  pagination={false}
+                  rowKey="id"
+                  size="small"
+                  scroll={{ x: 1630, y: 520 }}
+                  onChange={(_, filters) => setDepartmentFilteredInfo(filters)}
+                />
+              </div>
+            </div>
+          ) : (
+            <Table
+              columns={departmentColumns}
+              dataSource={info.departments}
+              expandable={{
+                expandedRowKeys: expandedDepartmentRowKeys,
+                expandIcon: ({ expanded, onExpand, record }) =>
+                  record.children?.length ? (
+                    <button
+                      className="payroll-tree-expand"
+                      type="button"
+                      aria-label={expanded ? "收起部门" : "展开部门"}
+                      onClick={(event) => onExpand(record, event)}
+                    >
+                      {expanded ? "▼" : "▶"}
+                    </button>
+                  ) : (
+                    <span className="payroll-tree-expand payroll-tree-expand--empty" />
+                  ),
+                onExpandedRowsChange: (keys) => setExpandedDepartmentRowKeys(keys.map((key) => String(key))),
+              }}
+              pagination={false}
+              rowKey="id"
+              size="small"
+              scroll={{ x: 1630, y: 520 }}
+              onChange={(_, filters) => setDepartmentFilteredInfo(filters)}
+            />
+          )}
         </div>
       ) : (
         <div className="payroll-employee-layout">
@@ -1560,17 +1615,18 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
         okText="关闭"
         cancelButtonProps={{ style: { display: "none" } }}
         title="员工薪资详情"
-        width={1080}
+        width={980}
       >
         {employeeDetail && employeeDetailItems ? (
           <div className="payroll-employee-modal__content">
-            <Descriptions title="基本信息" bordered size="small" column={3} items={employeeDetailItems.basic} />
-            <Descriptions title="考勤信息" bordered size="small" column={3} items={employeeDetailItems.attendance} />
-            <Descriptions title="KPI" bordered size="small" column={3} items={employeeDetailItems.kpi} />
-            <Descriptions title="提成" bordered size="small" column={4} items={employeeDetailItems.commission} />
-            <Descriptions title="奖金" bordered size="small" column={4} items={employeeDetailItems.bonus} />
-            <Descriptions title="综合补贴" bordered size="small" column={3} items={employeeDetailItems.comprehensiveSubsidy} />
-            <Descriptions title="审批调整" bordered size="small" column={4} items={employeeDetailItems.settlement} />
+            <div className="payroll-employee-modal__grid">
+              <Descriptions title="基础信息" bordered size="small" column={3} items={employeeDetailItems.basic} />
+              <Descriptions title="薪资结算" bordered size="small" column={3} items={employeeDetailItems.salary} />
+              <Descriptions title="考勤假勤" bordered size="small" column={2} items={employeeDetailItems.attendance} />
+              <Descriptions title="绩效提成" bordered size="small" column={2} items={employeeDetailItems.performance} />
+              <Descriptions title="补贴扣款" bordered size="small" column={2} items={employeeDetailItems.allowance} />
+              <Descriptions title="审批调整" bordered size="small" column={4} items={employeeDetailItems.settlement} />
+            </div>
             <div className="payroll-employee-modal__edit">
               <Input
                 placeholder="备注"
