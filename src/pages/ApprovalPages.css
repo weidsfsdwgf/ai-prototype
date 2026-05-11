@@ -238,6 +238,14 @@
   text-overflow: ellipsis;
 }
 
+.payroll-cell-ellipsis {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+
 .payroll-approval .ant-table-summary {
   background: var(--color-neutral-soft);
 }
@@ -301,6 +309,14 @@
   height: auto;
   padding: 0;
   color: var(--color-danger);
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.payroll-probation-name {
+  height: auto;
+  padding: 0;
+  color: var(--color-primary);
   font-size: inherit;
   line-height: inherit;
 }

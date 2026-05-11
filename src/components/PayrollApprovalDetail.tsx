@@ -29,7 +29,7 @@ type PayrollApprovalDetailProps = {
 type PayrollView = "department" | "employee";
 type DepartmentView = "tree" | "flat";
 type DetailItem = { label: string; value: string };
-type DepartmentDetailKind = "commission" | "kpi" | "subsidy" | "attendance";
+type DepartmentDetailKind = "attendance" | "commission" | "kpi" | "bonus" | "welfare";
 type DetailModalState = { title: string; kind: DepartmentDetailKind; department: PayrollDepartmentRecord };
 type EditableFields = Record<string, { remark: string; auditAdjustment: number }>;
 type LevelFilterValue = string | number | boolean;
@@ -116,6 +116,150 @@ function detailList(items: DetailItem[]) {
 
 function getDetailValue(items: DetailItem[], label: string) {
   return items.find((item) => item.label === label)?.value ?? "-";
+}
+
+function getDetailNumber(items: DetailItem[], label: string) {
+  return parseNumericText(getDetailValue(items, label));
+}
+
+function moneyItem(label: string, value: number): DetailItem {
+  return { label, value: formatMoney(value) };
+}
+
+function sumDetailItems(items: DetailItem[]) {
+  return items.reduce((total, item) => total + parseNumericText(item.value), 0);
+}
+
+function filterNonZeroDetails(items: DetailItem[]) {
+  return items.filter((item) => parseNumericText(item.value) !== 0);
+}
+
+function getKpiScore(record: PayrollEmployeeRecord) {
+  return getDetailNumber(record.kpiDetails, "KPI 分数");
+}
+
+function getOvertimeDetails(record: PayrollEmployeeRecord) {
+  const workday = getDetailNumber(record.overtimeDetails, "工作日加班");
+  const weekend = getDetailNumber(record.overtimeDetails, "周六加班") + getDetailNumber(record.overtimeDetails, "休息日加班");
+  const holiday = getDetailNumber(record.overtimeDetails, "节假日加班");
+
+  return [
+    { label: "工作日加班", value: `${formatNumber(workday)} 小时` },
+    { label: "休息日加班", value: `${formatNumber(weekend)} 小时` },
+    { label: "节假日加班", value: `${formatNumber(holiday)} 小时` },
+    { label: "过期加班", value: "0 小时" },
+  ];
+}
+
+function getCommissionPaidDetails(record: PayrollEmployeeRecord) {
+  const teamPerformance = Math.round(record.commissionPaid * 0.22);
+  return [
+    moneyItem("单月提成", record.commissionPaid - teamPerformance),
+    moneyItem("团队绩效", teamPerformance),
+  ];
+}
+
+function getRemainingCommissionDetails(record: PayrollEmployeeRecord) {
+  return [
+    moneyItem("当月剩余提成", record.remainingCommission),
+    moneyItem("累计剩余提成", record.remainingCommission + Math.max(record.previousMonthDiff, 0)),
+  ];
+}
+
+function getComprehensiveSubsidyDetails(record: PayrollEmployeeRecord) {
+  const guarantee = getDetailNumber(record.businessSubsidyDetails, "保底提成补贴");
+  return [
+    ...record.comprehensiveSubsidyDetails,
+    moneyItem("保底提成补贴", guarantee),
+  ];
+}
+
+function getAttendanceSubsidyDetails(record: PayrollEmployeeRecord) {
+  const overtimeSubsidy =
+    getDetailNumber(record.attendanceSubsidyDetails, "平时及周末加班费用") +
+    getDetailNumber(record.attendanceSubsidyDetails, "节假日加班费") +
+    getDetailNumber(record.attendanceSubsidyDetails, "加班补贴");
+  return [
+    moneyItem("加班补贴", overtimeSubsidy),
+    {
+      label: "病假/婚假/陪产假/产假/丧假补贴",
+      value: getDetailValue(record.attendanceSubsidyDetails, "病假/婚假/陪产假/产假/丧假补贴"),
+    },
+  ];
+}
+
+function getBonusDetails(record: PayrollEmployeeRecord) {
+  const labels = ["爆款奖金", "培训导师奖金", "老带新补贴", "内推奖金", "年会奖金", "优秀标兵"];
+  return labels.map((label) => ({ label, value: getDetailValue(record.bonusDetails, label) === "-" ? "0" : getDetailValue(record.bonusDetails, label) }));
+}
+
+function getBonusTotal(record: PayrollEmployeeRecord) {
+  return sumDetailItems(getBonusDetails(record));
+}
+
+function getWelfareSubsidyDetails(record: PayrollEmployeeRecord) {
+  const staleReward = getDetailNumber(record.businessSubsidyDetails, "滞销奖励补贴");
+  const guarantee = getDetailNumber(record.businessSubsidyDetails, "保底提成补贴");
+  const seniority = record.rank === "P4" ? 160 : record.rank === "P3" ? 100 : 80;
+  const parking = record.area === "华南区域" ? 80 : 0;
+  const meal = 100;
+  const fullAttendance = record.leaveDays === 0 && record.lateCount === 0 ? 120 : 0;
+  const support = record.overtime >= 6 ? 80 : 0;
+  const allocated = seniority + parking + staleReward + guarantee + meal + fullAttendance + support;
+  const other = Math.max(record.welfareSubsidy - allocated, 0);
+
+  return [
+    moneyItem("工龄奖", seniority),
+    moneyItem("停车费补贴", parking),
+    moneyItem("滞销奖励补贴", staleReward),
+    moneyItem("老带新补贴", 0),
+    moneyItem("保护器差补", 0),
+    moneyItem("保底提成补贴", guarantee),
+    moneyItem("餐费补贴", meal),
+    moneyItem("调仓补贴", 0),
+    moneyItem("6天制补贴", 0),
+    moneyItem("体检费报销", 0),
+    moneyItem("支援补贴", support),
+    moneyItem("宿舍长补贴", 0),
+    moneyItem("旺季补贴", 0),
+    moneyItem("结婚礼金", 0),
+    moneyItem("产假补贴", 0),
+    moneyItem("其余补贴", other),
+    moneyItem("满勤补贴", fullAttendance),
+  ];
+}
+
+function getWelfareSubsidyTotal(record: PayrollEmployeeRecord) {
+  return sumDetailItems(getWelfareSubsidyDetails(record));
+}
+
+function getOtherDeductionDetails(record: PayrollEmployeeRecord) {
+  return [
+    moneyItem("五险（个人）", Math.round(record.otherDeduction * 0.36)),
+    moneyItem("公积金（个人）", Math.round(record.otherDeduction * 0.28)),
+    moneyItem("上月个税退还", 0),
+    moneyItem("扣除个税", record.otherDeduction - Math.round(record.otherDeduction * 0.64)),
+  ];
+}
+
+function getNameState(record: PayrollEmployeeRecord) {
+  if (record.resignationDate) {
+    return {
+      className: "payroll-resigned-name",
+      title: `${record.name} 离职信息`,
+      content: `离职日期：${record.resignationDate}`,
+    };
+  }
+
+  if (record.expectedRegularDate) {
+    return {
+      className: "payroll-probation-name",
+      title: `${record.name} 试用期信息`,
+      content: `预计转正日期：${record.expectedRegularDate}`,
+    };
+  }
+
+  return { className: "payroll-inline-link" };
 }
 
 function DetailValue({
@@ -388,22 +532,15 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
     const actualSalaryTotal = employees.reduce((total, employee) => total + getEmployeeActualSalary(employee, editableFields), 0);
     const commissionTotal = employees.reduce((total, employee) => total + employee.commissionPaid, 0);
     const kpiPaidTotal = employees.reduce((total, employee) => total + employee.kpiPaid, 0);
-    const kpiScoreTotal = employees.reduce(
-      (total, employee) => total + parseNumericText(getDetailValue(employee.kpiDetails, "KPI 分数")),
-      0,
-    );
-    const subsidyTotal = employees.reduce(
-      (total, employee) =>
-        total +
-        employee.bonus +
-        employee.comprehensiveSubsidy +
-        employee.attendanceSubsidy +
-        employee.businessSubsidy +
-        employee.welfareSubsidy,
-      0,
-    );
+    const kpiScoreTotal = employees.reduce((total, employee) => total + getKpiScore(employee), 0);
+    const bonusTotal = employees.reduce((total, employee) => total + getBonusTotal(employee), 0);
+    const welfareSubsidyTotal = employees.reduce((total, employee) => total + getWelfareSubsidyTotal(employee), 0);
     const expectedAttendanceTotal = employees.reduce((total, employee) => total + employee.expectedAttendance, 0);
     const actualAttendanceTotal = employees.reduce((total, employee) => total + employee.actualAttendance, 0);
+    const leaveTotal = employees.reduce((total, employee) => total + employee.leaveDays, 0);
+    const lateTotal = employees.reduce((total, employee) => total + employee.lateCount, 0);
+    const clockRepairTotal = employees.reduce((total, employee) => total + employee.clockRepairCount, 0);
+    const overtimeTotal = employees.reduce((total, employee) => total + employee.overtime, 0);
     const attendanceDeductionTotal = employees.reduce((total, employee) => total + employee.attendanceDeduction, 0);
 
     return {
@@ -415,8 +552,13 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       averageCommission: payrollCount > 0 ? commissionTotal / payrollCount : 0,
       averageKpiScore: payrollCount > 0 ? kpiScoreTotal / payrollCount : 0,
       averageKpiPaid: payrollCount > 0 ? kpiPaidTotal / payrollCount : 0,
-      subsidyTotal,
+      bonusTotal,
+      welfareSubsidyTotal,
       attendanceRate: expectedAttendanceTotal > 0 ? (actualAttendanceTotal / expectedAttendanceTotal) * 100 : 0,
+      averageLeave: payrollCount > 0 ? leaveTotal / payrollCount : 0,
+      averageLate: payrollCount > 0 ? lateTotal / payrollCount : 0,
+      averageClockRepair: payrollCount > 0 ? clockRepairTotal / payrollCount : 0,
+      averageOvertime: payrollCount > 0 ? overtimeTotal / payrollCount : 0,
       averageAttendanceDeduction: payrollCount > 0 ? attendanceDeductionTotal / payrollCount : 0,
     };
   };
@@ -504,6 +646,56 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       render: (_, record) => formatMoney(getDepartmentMetrics(record).averageSalary),
     },
     {
+      title: "出勤率",
+      key: "attendanceRate",
+      width: 100,
+      align: "right",
+      render: (_, record) => formatPercent(getDepartmentMetrics(record).attendanceRate),
+    },
+    {
+      title: "人均请假",
+      key: "averageLeave",
+      width: 95,
+      align: "right",
+      render: (_, record) => formatNumber(getDepartmentMetrics(record).averageLeave),
+    },
+    {
+      title: "人均迟到",
+      key: "averageLate",
+      width: 95,
+      align: "right",
+      render: (_, record) => formatNumber(getDepartmentMetrics(record).averageLate),
+    },
+    {
+      title: "人均补卡",
+      key: "averageClockRepair",
+      width: 95,
+      align: "right",
+      render: (_, record) => formatNumber(getDepartmentMetrics(record).averageClockRepair),
+    },
+    {
+      title: "人均加班",
+      key: "averageOvertime",
+      width: 95,
+      align: "right",
+      render: (_, record) => formatNumber(getDepartmentMetrics(record).averageOvertime),
+    },
+    {
+      title: "人均考勤扣款",
+      key: "averageAttendanceDeduction",
+      width: 120,
+      align: "right",
+      render: (_, record) => (
+        <Button
+          type="link"
+          className="payroll-inline-link"
+          onClick={() => setDetailModal({ title: `${record.name} 考勤扣款明细`, kind: "attendance", department: record })}
+        >
+          {formatMoney(getDepartmentMetrics(record).averageAttendanceDeduction)}
+        </Button>
+      ),
+    },
+    {
       title: "提成合计",
       key: "commissionTotal",
       width: 120,
@@ -548,39 +740,32 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       ),
     },
     {
-      title: "奖金/补贴合计",
-      key: "subsidyTotal",
+      title: "奖金合计",
+      key: "bonusTotal",
+      width: 110,
+      align: "right",
+      render: (_, record) => (
+        <Button
+          type="link"
+          className="payroll-inline-link"
+          onClick={() => setDetailModal({ title: `${record.name} 奖金明细`, kind: "bonus", department: record })}
+        >
+          {formatMoney(getDepartmentMetrics(record).bonusTotal)}
+        </Button>
+      ),
+    },
+    {
+      title: "福利补贴合计",
+      key: "welfareSubsidyTotal",
       width: 130,
       align: "right",
       render: (_, record) => (
         <Button
           type="link"
           className="payroll-inline-link"
-          onClick={() => setDetailModal({ title: `${record.name} 奖金/补贴明细`, kind: "subsidy", department: record })}
+          onClick={() => setDetailModal({ title: `${record.name} 福利补贴明细`, kind: "welfare", department: record })}
         >
-          {formatMoney(getDepartmentMetrics(record).subsidyTotal)}
-        </Button>
-      ),
-    },
-    {
-      title: "出勤率",
-      key: "attendanceRate",
-      width: 100,
-      align: "right",
-      render: (_, record) => formatPercent(getDepartmentMetrics(record).attendanceRate),
-    },
-    {
-      title: "人均考勤扣款",
-      key: "averageAttendanceDeduction",
-      width: 120,
-      align: "right",
-      render: (_, record) => (
-        <Button
-          type="link"
-          className="payroll-inline-link"
-          onClick={() => setDetailModal({ title: `${record.name} 考勤扣款明细`, kind: "attendance", department: record })}
-        >
-          {formatMoney(getDepartmentMetrics(record).averageAttendanceDeduction)}
+          {formatMoney(getDepartmentMetrics(record).welfareSubsidyTotal)}
         </Button>
       ),
     },
@@ -593,19 +778,27 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       key: "name",
       width: 92,
       fixed: "left",
-      render: (name: string, record, index) => (
-        <Space size={6}>
-          <span className="payroll-row-index">{index + 1}</span>
-          <Button
-            type="link"
-            className={record.resignationDate ? "payroll-resigned-name" : "payroll-inline-link"}
-            title={record.resignationDate ? `离职日期：${record.resignationDate}` : undefined}
-            onClick={() => setEmployeeDetail(record)}
-          >
+      render: (name: string, record, index) => {
+        const nameState = getNameState(record);
+        const nameButton = (
+          <Button type="link" className={nameState.className} onClick={() => setEmployeeDetail(record)}>
             {name}
           </Button>
-        </Space>
-      ),
+        );
+
+        return (
+          <Space size={6}>
+            <span className="payroll-row-index">{index + 1}</span>
+            {nameState.content ? (
+              <Popover title={nameState.title} content={nameState.content} trigger="hover">
+                {nameButton}
+              </Popover>
+            ) : (
+              nameButton
+            )}
+          </Space>
+        );
+      },
     },
     {
       title: "区域",
@@ -644,7 +837,7 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       onFilter: (value, record) => record.rank === value,
     },
     { title: "入职日期", dataIndex: "hireDate", key: "hireDate", width: 94 },
-    { title: "转正日期", dataIndex: "regularDate", key: "regularDate", width: 94 },
+    { title: "转正日期", dataIndex: "regularDate", key: "regularDate", width: 94, render: (value: string) => value || "-" },
     {
       title: "薪资合计",
       dataIndex: "salaryTotal",
@@ -653,7 +846,17 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       align: "right",
       render: formatMoney,
     },
-    { title: "薪资结构", dataIndex: "salaryStructure", key: "salaryStructure", width: 150 },
+    {
+      title: "薪资结构",
+      dataIndex: "salaryStructure",
+      key: "salaryStructure",
+      width: 150,
+      render: (value: string) => (
+        <Popover content={value} trigger="hover">
+          <span className="payroll-cell-ellipsis">{value}</span>
+        </Popover>
+      ),
+    },
     {
       title: "应出勤天数",
       dataIndex: "expectedAttendance",
@@ -689,7 +892,7 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       width: 64,
       align: "right",
       render: (value: number, record) => (
-        <DetailValue title={`${record.name} 加班明细`} value={value} items={record.overtimeDetails} />
+        <DetailValue title={`${record.name} 加班明细`} value={value} items={getOvertimeDetails(record)} />
       ),
     },
     {
@@ -709,7 +912,7 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       width: 88,
       align: "right",
       render: (value: number, record) => (
-        <DetailValue title={`${record.name} 提成明细`} value={formatMoney(value)} items={record.commissionDetails} />
+        <DetailValue title={`${record.name} 提成明细`} value={formatMoney(value)} items={getCommissionPaidDetails(record)} />
       ),
     },
     {
@@ -719,17 +922,7 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       width: 88,
       align: "right",
       render: (value: number, record) => (
-        <DetailValue title={`${record.name} 剩余提成明细`} value={formatMoney(value)} items={record.commissionDetails} />
-      ),
-    },
-    {
-      title: "奖金",
-      dataIndex: "bonus",
-      key: "bonus",
-      width: 70,
-      align: "right",
-      render: (value: number, record) => (
-        <DetailValue title={`${record.name} 奖金明细`} value={formatMoney(value)} items={record.bonusDetails} />
+        <DetailValue title={`${record.name} 剩余提成明细`} value={formatMoney(value)} items={getRemainingCommissionDetails(record)} />
       ),
     },
     {
@@ -738,49 +931,51 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       key: "comprehensiveSubsidy",
       width: 108,
       align: "right",
-      render: (value: number, record) => (
+      render: (_, record) => (
         <DetailValue
           title={`${record.name} 综合补贴明细`}
-          value={formatMoney(value)}
-          items={record.comprehensiveSubsidyDetails}
+          value={formatMoney(sumDetailItems(getComprehensiveSubsidyDetails(record)))}
+          items={getComprehensiveSubsidyDetails(record)}
         />
       ),
     },
     {
-      title: "实发假勤补贴",
+      title: "假勤补贴",
       dataIndex: "attendanceSubsidy",
       key: "attendanceSubsidy",
       width: 108,
       align: "right",
-      render: (value: number, record) => (
+      render: (_, record) => (
         <DetailValue
           title={`${record.name} 假勤补贴明细`}
-          value={formatMoney(value)}
-          items={record.attendanceSubsidyDetails}
+          value={formatMoney(sumDetailItems(getAttendanceSubsidyDetails(record)))}
+          items={getAttendanceSubsidyDetails(record)}
         />
       ),
     },
     {
-      title: "实发业务奖金补贴",
-      dataIndex: "businessSubsidy",
-      key: "businessSubsidy",
-      width: 126,
+      title: "奖金",
+      dataIndex: "bonus",
+      key: "bonus",
+      width: 70,
       align: "right",
-      render: (value: number, record) => (
-        <DetailValue
-          title={`${record.name} 业务奖金补贴明细`}
-          value={formatMoney(value)}
-          items={record.businessSubsidyDetails}
-        />
+      render: (_, record) => (
+        <DetailValue title={`${record.name} 奖金明细`} value={formatMoney(getBonusTotal(record))} items={filterNonZeroDetails(getBonusDetails(record))} />
       ),
     },
     {
-      title: "实发福利补贴",
+      title: "福利补贴",
       dataIndex: "welfareSubsidy",
       key: "welfareSubsidy",
       width: 108,
       align: "right",
-      render: formatMoney,
+      render: (_, record) => (
+        <DetailValue
+          title={`${record.name} 福利补贴明细`}
+          value={formatMoney(getWelfareSubsidyTotal(record))}
+          items={filterNonZeroDetails(getWelfareSubsidyDetails(record))}
+        />
+      ),
     },
     {
       title: "考勤扣款",
@@ -788,15 +983,22 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       key: "attendanceDeduction",
       width: 88,
       align: "right",
+      render: formatMoney,
+    },
+    {
+      title: "其余扣款",
+      dataIndex: "otherDeduction",
+      key: "otherDeduction",
+      width: 88,
+      align: "right",
       render: (value: number, record) => (
         <DetailValue
-          title={`${record.name} 考勤扣款明细`}
+          title={`${record.name} 其余扣款明细`}
           value={formatMoney(value)}
-          items={record.attendanceDeductionDetails}
+          items={getOtherDeductionDetails(record)}
         />
       ),
     },
-    { title: "其余扣款", dataIndex: "otherDeduction", key: "otherDeduction", width: 88, align: "right", render: formatMoney },
     {
       title: "代扣扣款",
       dataIndex: "withholdingDeduction",
@@ -905,34 +1107,53 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       return [
         ...baseColumns,
         {
-          title: "销售额",
-          key: "sales",
-          width: 90,
+          title: "提成明细字段1",
+          key: "commissionDetail1",
+          width: 120,
           align: "right",
-          render: (_, record) => getDetailValue(record.commissionDetails, "销售额"),
+          render: (_, record) => record.commissionDetails[0]?.value ?? "-",
         },
         {
-          title: "增加率",
-          key: "growth",
-          width: 80,
+          title: "提成明细字段2",
+          key: "commissionDetail2",
+          width: 120,
           align: "right",
-          render: (_, record) => getDetailValue(record.commissionDetails, "增加率"),
+          render: (_, record) => record.commissionDetails[1]?.value ?? "-",
         },
         {
-          title: "实发提成",
-          dataIndex: "commissionPaid",
-          key: "commissionPaid",
-          width: 90,
+          title: "提成明细字段3",
+          key: "commissionDetail3",
+          width: 120,
           align: "right",
-          render: formatMoney,
+          render: (_, record) => record.commissionDetails[2]?.value ?? "-",
         },
         {
-          title: "剩余提成",
-          dataIndex: "remainingCommission",
-          key: "remainingCommission",
+          title: "单月提成",
+          key: "monthlyCommission",
           width: 90,
           align: "right",
-          render: formatMoney,
+          render: (_, record) => getDetailValue(getCommissionPaidDetails(record), "单月提成"),
+        },
+        {
+          title: "团队绩效",
+          key: "teamPerformance",
+          width: 90,
+          align: "right",
+          render: (_, record) => getDetailValue(getCommissionPaidDetails(record), "团队绩效"),
+        },
+        {
+          title: "当月剩余提成",
+          key: "currentRemainingCommission",
+          width: 120,
+          align: "right",
+          render: (_, record) => getDetailValue(getRemainingCommissionDetails(record), "当月剩余提成"),
+        },
+        {
+          title: "累计剩余提成",
+          key: "accumulatedRemainingCommission",
+          width: 120,
+          align: "right",
+          render: (_, record) => getDetailValue(getRemainingCommissionDetails(record), "累计剩余提成"),
         },
       ];
     }
@@ -965,108 +1186,149 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       ];
     }
 
-    if (kind === "subsidy") {
+    if (kind === "bonus") {
       return [
         ...baseColumns,
         {
-          title: "奖金",
-          dataIndex: "bonus",
-          key: "bonus",
-          width: 80,
-          align: "right",
-          render: formatMoney,
-        },
-        {
-          title: "综合补贴",
-          dataIndex: "comprehensiveSubsidy",
-          key: "comprehensiveSubsidy",
+          title: "爆款奖金",
+          key: "hotProductBonus",
           width: 90,
           align: "right",
-          render: formatMoney,
+          render: (_, record) => getDetailValue(getBonusDetails(record), "爆款奖金"),
         },
         {
-          title: "假勤补贴",
-          dataIndex: "attendanceSubsidy",
-          key: "attendanceSubsidy",
-          width: 90,
-          align: "right",
-          render: formatMoney,
-        },
-        {
-          title: "业务奖金补贴",
-          dataIndex: "businessSubsidy",
-          key: "businessSubsidy",
+          title: "培训导师奖金",
+          key: "mentorBonus",
           width: 110,
           align: "right",
-          render: formatMoney,
+          render: (_, record) => getDetailValue(getBonusDetails(record), "培训导师奖金"),
         },
         {
-          title: "福利补贴",
-          dataIndex: "welfareSubsidy",
-          key: "welfareSubsidy",
-          width: 90,
+          title: "老带新补贴",
+          key: "referralSubsidy",
+          width: 100,
           align: "right",
-          render: formatMoney,
+          render: (_, record) => getDetailValue(getBonusDetails(record), "老带新补贴"),
         },
         {
-          title: "合计",
-          key: "subsidyTotal",
+          title: "内推奖金",
+          key: "internalReferralBonus",
           width: 90,
           align: "right",
-          render: (_, record) =>
-            formatMoney(
-              record.bonus +
-                record.comprehensiveSubsidy +
-                record.attendanceSubsidy +
-                record.businessSubsidy +
-                record.welfareSubsidy,
-            ),
+          render: (_, record) => getDetailValue(getBonusDetails(record), "内推奖金"),
+        },
+        {
+          title: "年会奖金",
+          key: "annualMeetingBonus",
+          width: 90,
+          align: "right",
+          render: (_, record) => getDetailValue(getBonusDetails(record), "年会奖金"),
+        },
+        {
+          title: "优秀标兵",
+          key: "modelEmployeeBonus",
+          width: 90,
+          align: "right",
+          render: (_, record) => getDetailValue(getBonusDetails(record), "优秀标兵"),
         },
       ];
     }
 
-    return [
-      ...baseColumns,
-      {
-        title: "应出勤",
-        dataIndex: "expectedAttendance",
-        key: "expectedAttendance",
-        width: 80,
-        align: "right",
-        render: formatNumber,
-      },
-      {
-        title: "实出勤",
-        dataIndex: "actualAttendance",
-        key: "actualAttendance",
-        width: 80,
-        align: "right",
-        render: formatNumber,
-      },
-      { title: "迟到次数", dataIndex: "lateCount", key: "lateCount", width: 80, align: "right" },
-      {
-        title: "缺勤工资",
-        key: "absenceWage",
-        width: 90,
-        align: "right",
-        render: (_, record) => getDetailValue(record.attendanceDeductionDetails, "缺勤工资"),
-      },
-      {
-        title: "考勤违规扣分",
-        key: "violationDeduction",
-        width: 110,
-        align: "right",
-        render: (_, record) => getDetailValue(record.attendanceDeductionDetails, "考勤违规扣分"),
-      },
-      {
-        title: "考勤扣款",
-        dataIndex: "attendanceDeduction",
-        key: "attendanceDeduction",
-        width: 90,
-        align: "right",
-        render: formatMoney,
-      },
-    ];
+    if (kind === "welfare") {
+      const labels = [
+        "工龄奖",
+        "停车费补贴",
+        "滞销奖励补贴",
+        "老带新补贴",
+        "保护器差补",
+        "保底提成补贴",
+        "餐费补贴",
+        "调仓补贴",
+        "6天制补贴",
+        "体检费报销",
+        "支援补贴",
+        "宿舍长补贴",
+        "旺季补贴",
+        "结婚礼金",
+        "产假补贴",
+        "其余补贴",
+        "满勤补贴",
+      ];
+
+      return [
+        ...baseColumns,
+        ...labels.map((label) => ({
+          title: label,
+          key: label,
+          width: label.length > 4 ? 110 : 90,
+          align: "right" as const,
+          render: (_: unknown, record: PayrollEmployeeRecord) => getDetailValue(getWelfareSubsidyDetails(record), label),
+        })),
+      ];
+    }
+
+    if (kind === "attendance") {
+      return [
+        ...baseColumns,
+        {
+          title: "应出勤",
+          dataIndex: "expectedAttendance",
+          key: "expectedAttendance",
+          width: 80,
+          align: "right",
+          render: formatNumber,
+        },
+        {
+          title: "实出勤",
+          dataIndex: "actualAttendance",
+          key: "actualAttendance",
+          width: 80,
+          align: "right",
+          render: formatNumber,
+        },
+        { title: "迟到", dataIndex: "lateCount", key: "lateCount", width: 70, align: "right" },
+        { title: "补卡", dataIndex: "clockRepairCount", key: "clockRepairCount", width: 70, align: "right" },
+        { title: "加班", dataIndex: "overtime", key: "overtime", width: 70, align: "right", render: formatNumber },
+        {
+          title: "事假",
+          key: "personalLeave",
+          width: 70,
+          align: "right",
+          render: (_, record) => getDetailValue(record.leaveDetails, "事假"),
+        },
+        {
+          title: "年假",
+          key: "annualLeave",
+          width: 70,
+          align: "right",
+          render: (_, record) => getDetailValue(record.leaveDetails, "年假"),
+        },
+        {
+          title: "病假",
+          key: "sickLeave",
+          width: 70,
+          align: "right",
+          render: (_, record) => getDetailValue(record.leaveDetails, "病假"),
+        },
+        {
+          title: "婚嫁/陪产假/产假/丧假",
+          key: "specialLeave",
+          width: 170,
+          align: "right",
+          render: (_, record) => getDetailValue(record.leaveDetails, "婚嫁/陪产假/产假/丧假"),
+        },
+        {
+          title: "考勤扣款",
+          dataIndex: "attendanceDeduction",
+          key: "attendanceDeduction",
+          width: 90,
+          align: "right",
+          render: formatMoney,
+        },
+      ];
+    }
+
+    return baseColumns;
   };
 
   const renderSummaryRow = (label: string, mode: "sum" | "avg") => (
@@ -1081,6 +1343,22 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
 
               if (key === "auditAdjustment") {
                 return total + (editableFields[employee.id]?.auditAdjustment ?? employee.auditAdjustment);
+              }
+
+              if (key === "comprehensiveSubsidy") {
+                return total + sumDetailItems(getComprehensiveSubsidyDetails(employee));
+              }
+
+              if (key === "attendanceSubsidy") {
+                return total + sumDetailItems(getAttendanceSubsidyDetails(employee));
+              }
+
+              if (key === "bonus") {
+                return total + getBonusTotal(employee);
+              }
+
+              if (key === "welfareSubsidy") {
+                return total + getWelfareSubsidyTotal(employee);
               }
 
               const rawValue = employee[key as keyof PayrollEmployeeRecord];

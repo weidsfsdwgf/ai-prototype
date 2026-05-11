@@ -27,6 +27,7 @@ export type PayrollEmployeeRecord = {
   rank: string;
   hireDate: string;
   regularDate: string;
+  expectedRegularDate?: string;
   resignationDate?: string;
   salaryTotal: number;
   salaryStructure: string;
@@ -321,7 +322,7 @@ export const payrollApprovalInfo: PayrollApprovalInfo = {
       hireDate: "2020-03-16",
       regularDate: "2020-06-16",
       salaryTotal: 23880,
-      salaryStructure: "基本 14500 + 岗位 2500 + 绩效 4200",
+      salaryStructure: "固定薪资 21200（含绩效 4200） + 管理补贴 400 + 来厦补贴 200",
       expectedAttendance: 22,
       actualAttendance: 21.5,
       leaveDays: 0.5,
@@ -411,7 +412,7 @@ export const payrollApprovalInfo: PayrollApprovalInfo = {
       hireDate: "2021-07-01",
       regularDate: "2021-10-01",
       salaryTotal: 18780,
-      salaryStructure: "基本 11800 + 岗位 1800 + 绩效 4200",
+      salaryStructure: "固定薪资 17800（含绩效 4200） + 管理补贴 260 + 来厦补贴 200",
       expectedAttendance: 22,
       actualAttendance: 21.5,
       leaveDays: 0,
@@ -502,7 +503,7 @@ export const payrollApprovalInfo: PayrollApprovalInfo = {
       regularDate: "2022-05-14",
       resignationDate: "2026-04-25",
       salaryTotal: 17960,
-      salaryStructure: "基本 11200 + 岗位 1600 + 绩效 3700",
+      salaryStructure: "固定薪资 16500（含绩效 3700） + 管理补贴 160 + 来厦补贴 200",
       expectedAttendance: 22,
       actualAttendance: 21,
       leaveDays: 1,
@@ -592,7 +593,7 @@ export const payrollApprovalInfo: PayrollApprovalInfo = {
       hireDate: "2023-09-01",
       regularDate: "2023-12-01",
       salaryTotal: 17520,
-      salaryStructure: "基本 10800 + 岗位 1500 + 绩效 3700",
+      salaryStructure: "固定薪资 16000（含绩效 3700） + 管理补贴 120 + 来厦补贴 200",
       expectedAttendance: 22,
       actualAttendance: 22,
       leaveDays: 0,
@@ -682,7 +683,7 @@ export const payrollApprovalInfo: PayrollApprovalInfo = {
       hireDate: "2019-11-11",
       regularDate: "2020-02-11",
       salaryTotal: 21980,
-      salaryStructure: "基本 13600 + 岗位 2400 + 绩效 4000",
+      salaryStructure: "固定薪资 20000（含绩效 4000） + 管理补贴 360 + 来厦补贴 200",
       expectedAttendance: 22,
       actualAttendance: 22,
       leaveDays: 0,
@@ -772,7 +773,7 @@ export const payrollApprovalInfo: PayrollApprovalInfo = {
       hireDate: "2020-08-20",
       regularDate: "2020-11-20",
       salaryTotal: 18280,
-      salaryStructure: "基本 11200 + 岗位 1800 + 绩效 3900",
+      salaryStructure: "固定薪资 16900（含绩效 3900） + 管理补贴 220 + 来厦补贴 200",
       expectedAttendance: 22,
       actualAttendance: 21.5,
       leaveDays: 0.5,
@@ -862,7 +863,7 @@ export const payrollApprovalInfo: PayrollApprovalInfo = {
       hireDate: "2022-10-08",
       regularDate: "2023-01-08",
       salaryTotal: 18860,
-      salaryStructure: "基本 11600 + 岗位 1500 + 绩效 3600",
+      salaryStructure: "固定薪资 16700（含绩效 3600） + 管理补贴 120 + 来厦补贴 200",
       expectedAttendance: 22,
       actualAttendance: 21,
       leaveDays: 1,
@@ -950,9 +951,10 @@ export const payrollApprovalInfo: PayrollApprovalInfo = {
       position: "计划专员",
       rank: "P2",
       hireDate: "2023-04-17",
-      regularDate: "2023-07-17",
+      regularDate: "",
+      expectedRegularDate: "2026-07-17",
       salaryTotal: 17560,
-      salaryStructure: "基本 10600 + 岗位 1500 + 绩效 3900",
+      salaryStructure: "固定薪资 16000（含绩效 3900） + 学历补贴 200 + 来厦补贴 200",
       expectedAttendance: 22,
       actualAttendance: 21,
       leaveDays: 1,
