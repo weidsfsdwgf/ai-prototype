@@ -261,7 +261,7 @@
 .payroll-inline-link {
   height: auto;
   padding: 0;
-  color: var(--color-action-link);
+  color: var(--color-action-link) !important;
   font-size: inherit;
   line-height: inherit;
 }
@@ -308,7 +308,7 @@
 .payroll-resigned-name {
   height: auto;
   padding: 0;
-  color: var(--color-danger);
+  color: var(--color-danger) !important;
   font-size: inherit;
   line-height: inherit;
 }
@@ -316,9 +316,21 @@
 .payroll-probation-name {
   height: auto;
   padding: 0;
-  color: var(--color-primary);
+  color: var(--color-warning) !important;
   font-size: inherit;
   line-height: inherit;
+}
+
+.payroll-inline-link:hover {
+  color: var(--color-action-link-hover) !important;
+}
+
+.payroll-resigned-name:hover {
+  color: var(--color-danger-hover) !important;
+}
+
+.payroll-probation-name:hover {
+  color: var(--color-warning) !important;
 }
 
 .payroll-detail-list {
