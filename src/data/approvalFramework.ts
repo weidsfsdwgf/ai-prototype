@@ -1,3 +1,5 @@
+import { payrollApprovalInfo, type PayrollApprovalInfo } from "./payrollApproval";
+
 export type ApprovalHandleType = "待办理" | "已通过" | "已驳回" | "已转办" | "抄送";
 export type ApprovalStatus = "进行中" | "已结束";
 export type ApprovalResult = "处理中" | "已通过" | "已驳回" | "已撤回";
@@ -35,6 +37,7 @@ export type ApprovalRecord = {
     confirmationDetail: string;
     remark: string;
   }>;
+  payrollInfo?: PayrollApprovalInfo;
 };
 
 export type MyInitiatedApprovalRecord = {
@@ -50,6 +53,19 @@ export type MyInitiatedApprovalRecord = {
 };
 
 export const pendingApprovals: ApprovalRecord[] = [
+  {
+    id: "AP-1000",
+    flowName: "薪酬审批",
+    documentNo: "PAY-202604-001",
+    initiator: "林珊",
+    summary: "薪酬月份：2026-04 | 算薪人数：8 | 薪资合计：154820",
+    status: "进行中",
+    result: "处理中",
+    createdAt: "2026-05-08 18:20",
+    currentNode: "薪酬负责人审批",
+    handleType: "待办理",
+    payrollInfo: payrollApprovalInfo,
+  },
   {
     id: "AP-1001",
     flowName: "员工调动审批",

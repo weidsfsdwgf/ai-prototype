@@ -1,6 +1,7 @@
 import { Button, Descriptions, Drawer, Form, Input, Modal, Select, Space, Tag, Timeline } from "antd";
 import { Check, CheckCircle2, Clock3, Maximize2, Minimize2, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { PayrollApprovalDetail } from "./PayrollApprovalDetail";
 import {
   approvalChain,
   type ApprovalHandleType,
@@ -55,11 +56,11 @@ export function ApprovalDetailDrawer({
   useEffect(() => {
     setOpinion("");
     setOpinionInvalid(false);
-    setFullscreen(false);
+    setFullscreen(Boolean(record?.payrollInfo));
     setTransferOpen(false);
     setTransferUser(undefined);
     setTransferUserInvalid(false);
-  }, [record?.id]);
+  }, [record?.id, record?.payrollInfo]);
 
   const handleReject = () => {
     if (!opinion.trim()) {
@@ -247,7 +248,13 @@ export function ApprovalDetailDrawer({
       {record ? (
         <div className="approval-drawer__content">
           <SectionPanel title="审批信息">
-            {record.resignationInfo ? renderResignationApprovalInfo(record) : <Descriptions bordered column={2} items={descriptionItems} />}
+            {record.payrollInfo ? (
+              <PayrollApprovalDetail info={record.payrollInfo} />
+            ) : record.resignationInfo ? (
+              renderResignationApprovalInfo(record)
+            ) : (
+              <Descriptions bordered column={2} items={descriptionItems} />
+            )}
           </SectionPanel>
           <SectionPanel title="审批链路">
             <Timeline

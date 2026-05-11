@@ -143,6 +143,322 @@
   line-height: 20px;
 }
 
+.payroll-approval {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.payroll-approval__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.payroll-approval__subtoolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.payroll-view-switch {
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.payroll-view-switch .ant-segmented-item-selected {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.payroll-mode-switch {
+  border: 1px solid var(--color-border);
+  background: var(--color-neutral-soft);
+}
+
+.payroll-mode-switch .ant-segmented-item {
+  min-height: 26px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.payroll-mode-switch .ant-segmented-item-selected {
+  color: var(--color-primary);
+}
+
+.payroll-approval__primary-tools {
+  align-items: center;
+}
+
+.payroll-approval__title {
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.payroll-level-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.payroll-approval__meta {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.payroll-approval__stack {
+  display: grid;
+  gap: 12px;
+}
+
+.payroll-approval .ant-table-wrapper,
+.payroll-employee-layout__table {
+  min-width: 0;
+}
+
+.payroll-approval .ant-table-small .ant-table-thead > tr > th,
+.payroll-approval .ant-table-small .ant-table-tbody > tr > td,
+.payroll-approval .ant-table-small .ant-table-summary > tr > td {
+  padding: 4px 6px;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.payroll-approval .ant-table-small .ant-table-tbody > tr > td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.payroll-approval .ant-table-summary {
+  background: var(--color-neutral-soft);
+}
+
+.payroll-summary-number {
+  display: block;
+  text-align: right;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.payroll-department-link,
+.payroll-inline-link {
+  height: auto;
+  padding: 0;
+  color: var(--color-action-link);
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.payroll-department-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.payroll-tree-expand {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.payroll-tree-expand--empty {
+  cursor: default;
+}
+
+.payroll-row-index {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: var(--color-neutral-soft);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.payroll-resigned-name {
+  height: auto;
+  padding: 0;
+  color: var(--color-danger);
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.payroll-detail-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  min-width: 260px;
+  margin: 0;
+}
+
+.payroll-detail-list dt {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.payroll-detail-list dd {
+  margin: 2px 0 0;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.payroll-employee-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+}
+
+.payroll-employee-layout__tree {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-neutral-soft);
+}
+
+.payroll-employee-layout__tree .ant-tree {
+  background: transparent;
+}
+
+.payroll-employee-layout__tree .ant-tree-node-content-wrapper {
+  min-width: 0;
+}
+
+.payroll-employee-layout__tree .ant-tree-title {
+  display: inline-block;
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+.payroll-tree-title {
+  display: inline-flex;
+  max-width: 190px;
+  align-items: center;
+  gap: 6px;
+}
+
+.payroll-tree-title > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.payroll-tree-count {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.payroll-tree-icon {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.payroll-tree-icon--department {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.payroll-tree-icon--employee {
+  border-radius: 999px;
+}
+
+.payroll-tree-icon--female {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.payroll-tree-icon--male {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.payroll-detail-modal .ant-table-small .ant-table-thead > tr > th,
+.payroll-detail-modal .ant-table-small .ant-table-tbody > tr > td {
+  padding: 4px 6px;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.payroll-employee-modal__content {
+  display: grid;
+  gap: 10px;
+}
+
+.payroll-employee-modal .ant-descriptions-title {
+  margin-bottom: 6px;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.payroll-employee-modal .ant-descriptions-small .ant-descriptions-item-label,
+.payroll-employee-modal .ant-descriptions-small .ant-descriptions-item-content {
+  padding: 5px 8px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.payroll-employee-modal__edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.payroll-employee-modal__edit .ant-input {
+  width: 320px;
+}
+
+.payroll-approval .ant-input-number {
+  width: 100%;
+}
+
+.payroll-approval .ant-input-sm {
+  padding-inline: 6px;
+}
+
 @media (max-width: 980px) {
   .approval-resignation-matters__header {
     flex-direction: column;
@@ -155,5 +471,24 @@
   .approval-resignation-matter-row {
     grid-template-columns: 1fr;
     align-items: flex-start;
+  }
+
+  .payroll-approval__toolbar,
+  .payroll-approval__subtoolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .payroll-employee-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .payroll-employee-layout__tree {
+    max-height: 240px;
+    overflow: auto;
+  }
+
+  .payroll-detail-list {
+    grid-template-columns: 1fr;
   }
 }
