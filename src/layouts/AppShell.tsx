@@ -11,7 +11,7 @@ import { useShellStore } from "../store/useShellStore";
 import "./AppShell.css";
 
 const { Header, Sider, Content } = Layout;
-const defaultOpenKeys = ["oa", "oa-system", "oa-hr", "oa-approval", "oa-assets", "oa-config"];
+const defaultOpenKeys = ["oa", "oa-system", "oa-hr", "oa-performance", "oa-approval", "oa-assets"];
 type MenuItem = NonNullable<MenuProps["items"]>[number];
 const frameworkBreadcrumbs: Record<string, string[]> = {
   "/standards": ["页面标准", "标准总览"],

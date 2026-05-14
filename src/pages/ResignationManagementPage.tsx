@@ -1,20 +1,26 @@
-import { Button, DatePicker, Drawer, Form, Input, Modal, Popover, Select, Space, Table, Tag } from "antd";
+import { Button, DatePicker, Drawer, Form, Input, Modal, Popover, Radio, Select, Space, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table/interface";
 import dayjs from "dayjs";
-import { CheckCircle2, Download, Filter, PencilLine, RotateCcw, Settings2 } from "lucide-react";
+import { CheckCircle2, Download, Filter, PencilLine, RefreshCw, RotateCcw, Settings2, Wand2 } from "lucide-react";
 import { useState } from "react";
 import { ApprovalDetailDrawer } from "../components/ApprovalDetailDrawer";
 import { SectionPanel } from "../components/SectionPanel";
 import { TableActions } from "../components/TableActions";
 import {
   resignationAreaOptions,
+  resignationCertificateDefaultPlaceholders,
+  resignationCertificatePlaceholderLabels,
   resignationDepartmentOptions,
+  resignationCertificateTemplates,
   resignationHrOptions,
   resignationManagementRecords,
   resignationReasonOptions,
   resignationTypeOptions,
   toResignationApprovalRecord,
   type ResignationApprovalStatus,
+  type ResignationCertificate,
+  type ResignationCertificateApplication,
+  type ResignationCertificateTemplate,
   type ResignationManagementRecord,
   type ResignationManagementStatus,
   type ResignationRiskResult,
@@ -69,6 +75,31 @@ function getConfirmationLabel(conclusion: string) {
 }
 
 const resignationMatterAssigneeOptions = ["陈嘉", "林珊", "周霖", "许佳", "王越", "何敏"];
+const resignationCertificatePlaceholderKeys = Object.keys(resignationCertificatePlaceholderLabels);
+
+function buildSealApplication(record: ResignationManagementRecord, template: ResignationCertificateTemplate): ResignationCertificateApplication {
+  return {
+    templateId: template.id,
+    templateName: template.name,
+    fileName: `${record.name}-离职证明.docx`,
+    status: "用印申请中",
+    sealApplicationNo: `SEAL-${dayjs().format("YYYYMM")}-${record.employeeNo.slice(-4)}`,
+    appliedAt: dayjs().format("YYYY-MM-DD HH:mm"),
+  };
+}
+
+function buildCertificatePlaceholderValues(record: ResignationManagementRecord, template: ResignationCertificateTemplate) {
+  return {
+    ...resignationCertificateDefaultPlaceholders,
+    ...template.placeholderDefaults,
+    employeeName: record.name,
+    employeeNo: record.employeeNo,
+    department: record.department,
+    position: record.position,
+    hireDate: record.hireDate,
+    resignationDate: record.resignationDate,
+  };
+}
 
 function getMatterKey(recordId: string, role: ResignationRiskResult["role"]) {
   return `${recordId}-${role}`;
@@ -166,7 +197,15 @@ function ConfirmResignationDrawer({
 }: {
   record?: ResignationManagementRecord;
   onClose: () => void;
-  onSubmit: (record: ResignationManagementRecord, values: { resignationDate: dayjs.Dayjs; resignationType: string; resignationReasons: string[]; reasonDescription?: string }) => void;
+  onSubmit: (
+    record: ResignationManagementRecord,
+    values: {
+      resignationDate: dayjs.Dayjs;
+      resignationType: string;
+      resignationReasons: string[];
+      reasonDescription?: string;
+    },
+  ) => void;
 }) {
   const [form] = Form.useForm();
 
@@ -260,6 +299,17 @@ export function ResignationManagementPage() {
   const [records, setRecords] = useState<ResignationManagementRecord[]>(resignationManagementRecords);
   const [confirmRecord, setConfirmRecord] = useState<ResignationManagementRecord>();
   const [approvalRecord, setApprovalRecord] = useState<ApprovalRecord>();
+  const [sealApprovalRecord, setSealApprovalRecord] = useState<ApprovalRecord>();
+  const [certificateTemplateSelectRecord, setCertificateTemplateSelectRecord] = useState<ResignationManagementRecord>();
+  const [selectedCertificateTemplateId, setSelectedCertificateTemplateId] = useState<string>();
+  const [certificateTemplatePreview, setCertificateTemplatePreview] = useState<{
+    record: ResignationManagementRecord;
+    template: ResignationCertificateTemplate;
+    values: Record<string, string>;
+    generatedAt: string;
+  }>();
+  const [certificatePreviewDiscardOpen, setCertificatePreviewDiscardOpen] = useState(false);
+  const [certificatePreview, setCertificatePreview] = useState<{ record: ResignationManagementRecord; certificate: ResignationCertificate }>();
   const [matterAssigneeConfig, setMatterAssigneeConfig] = useState<ResignationMatterAssigneeConfig>(resignationMatterAssigneeConfig);
   const [matterDispatchAssignees, setMatterDispatchAssignees] = useState<Record<string, string>>({});
   const [assigneeConfigOpen, setAssigneeConfigOpen] = useState(false);
@@ -268,6 +318,7 @@ export function ResignationManagementPage() {
   const [relaunchTarget, setRelaunchTarget] = useState<{ record: ResignationManagementRecord; role: ResignationRiskResult["role"] }>();
   const [transferTarget, setTransferTarget] = useState<{ record: ResignationManagementRecord; role: ResignationRiskResult["role"] }>();
   const [assigneeConfigForm] = Form.useForm<ResignationMatterAssigneeConfig>();
+  const [certificateTemplatePreviewForm] = Form.useForm<Record<string, string>>();
   const [batchAssigneeForm] = Form.useForm<{ assignee: string }>();
   const [relaunchForm] = Form.useForm<{ assignee: string }>();
   const [transferForm] = Form.useForm<{ assignee: string }>();
@@ -291,7 +342,12 @@ export function ResignationManagementPage() {
 
   const submitConfirm = (
     record: ResignationManagementRecord,
-    values: { resignationDate: dayjs.Dayjs; resignationType: string; resignationReasons: string[]; reasonDescription?: string },
+    values: {
+      resignationDate: dayjs.Dayjs;
+      resignationType: string;
+      resignationReasons: string[];
+      reasonDescription?: string;
+    },
   ) => {
     setRecords((current) =>
       current.map((item) =>
@@ -310,6 +366,127 @@ export function ResignationManagementPage() {
       ),
     );
     setConfirmRecord(undefined);
+  };
+
+  const openCertificateSelection = (record: ResignationManagementRecord) => {
+    setSelectedCertificateTemplateId(record.resignationCertificate?.templateId ?? resignationCertificateTemplates[0]?.id);
+    setCertificateTemplateSelectRecord(record);
+  };
+
+  const openCertificateTemplatePreview = (record: ResignationManagementRecord, template: ResignationCertificateTemplate, valuesOverride?: Record<string, string>) => {
+    const values = {
+      ...resignationCertificateDefaultPlaceholders,
+      ...template.placeholderDefaults,
+      ...valuesOverride,
+    };
+
+    certificateTemplatePreviewForm.setFieldsValue(values);
+    setCertificateTemplatePreview({
+      record,
+      template,
+      values,
+      generatedAt: dayjs().format("YYYY-MM-DD HH:mm"),
+    });
+  };
+
+  const enterCertificateTemplatePreview = () => {
+    if (!certificateTemplateSelectRecord || !selectedCertificateTemplateId) {
+      return;
+    }
+
+    const selectedTemplate = resignationCertificateTemplates.find((item) => item.id === selectedCertificateTemplateId);
+
+    if (!selectedTemplate) {
+      return;
+    }
+
+    openCertificateTemplatePreview(
+      certificateTemplateSelectRecord,
+      selectedTemplate,
+      buildCertificatePlaceholderValues(certificateTemplateSelectRecord, selectedTemplate),
+    );
+    setCertificateTemplateSelectRecord(undefined);
+    setSelectedCertificateTemplateId(undefined);
+  };
+
+  const regenerateCertificateTemplatePreview = async () => {
+    if (!certificateTemplatePreview) {
+      return;
+    }
+
+    const values = await certificateTemplatePreviewForm.validateFields();
+    const nextValues = resignationCertificatePlaceholderKeys.reduce<Record<string, string>>(
+      (result, key) => ({
+        ...result,
+        [key]: values[key] ?? "",
+      }),
+      {},
+    );
+
+    setCertificateTemplatePreview({
+      ...certificateTemplatePreview,
+      values: nextValues,
+      generatedAt: dayjs().format("YYYY-MM-DD HH:mm"),
+    });
+  };
+
+  const cancelCertificateTemplatePreview = () => {
+    if (!certificateTemplatePreview) {
+      return;
+    }
+
+    setCertificatePreviewDiscardOpen(true);
+  };
+
+  const discardCertificateTemplatePreview = () => {
+    setCertificatePreviewDiscardOpen(false);
+    setCertificateTemplatePreview(undefined);
+    certificateTemplatePreviewForm.resetFields();
+  };
+
+  const submitCertificateApproval = async () => {
+    if (!certificateTemplatePreview) {
+      return;
+    }
+
+    await certificateTemplatePreviewForm.validateFields();
+    const selectedTemplate = certificateTemplatePreview.template;
+    const targetRecord = certificateTemplatePreview.record;
+
+    setRecords((current) =>
+      current.map((item) =>
+        item.id === targetRecord.id
+          ? {
+              ...item,
+              resignationCertificateApplication: buildSealApplication(item, selectedTemplate),
+              updater: "林珊",
+              updatedAt: dayjs().format("YYYY-MM-DD HH:mm"),
+            }
+          : item,
+      ),
+    );
+    setCertificatePreviewDiscardOpen(false);
+    setCertificateTemplatePreview(undefined);
+    certificateTemplatePreviewForm.resetFields();
+    Modal.success({
+      title: "已提交用印审批",
+      content: `文件类型：离职证明；员工：${targetRecord.name}；模板：${selectedTemplate.name}。`,
+    });
+  };
+
+  const openSealApprovalDetail = (record: ResignationManagementRecord, application: ResignationCertificateApplication) => {
+    setSealApprovalRecord({
+      id: application.sealApplicationNo,
+      flowName: "用印申请",
+      documentNo: application.sealApplicationNo,
+      initiator: "林珊",
+      summary: `文件类型：离职证明 | 员工：${record.name} | 模板：${application.templateName}`,
+      status: "进行中",
+      result: "处理中",
+      createdAt: application.appliedAt,
+      currentNode: "行政用印审批",
+      handleType: "待办理",
+    });
   };
 
   const openAssigneeConfig = () => {
@@ -470,6 +647,49 @@ export function ResignationManagementPage() {
       ),
     },
     {
+      title: "离职证明",
+      key: "resignationCertificate",
+      width: 170,
+      render: (_, record) => {
+        const certificate = record.resignationCertificate;
+        const application = record.resignationCertificateApplication;
+
+        if (record.status !== "已确认") {
+          return null;
+        }
+
+        if (application?.status === "用印申请中") {
+          return (
+            <Space size={4}>
+              <Tag color="blue">用印申请中</Tag>
+              <Button type="link" size="small" onClick={() => openSealApprovalDetail(record, application)}>
+                详情
+              </Button>
+            </Space>
+          );
+        }
+
+        if (!certificate) {
+          return (
+            <Button type="link" size="small" onClick={() => openCertificateSelection(record)}>
+              添加离职证明
+            </Button>
+          );
+        }
+
+        return (
+          <Space size={4}>
+            <Tag color="green" className="resignation-certificate-tag" onClick={() => setCertificatePreview({ record, certificate })}>
+              {certificate.templateName}
+            </Tag>
+            <Popover content="点击重新生成离职证明">
+              <Button type="text" size="small" icon={<RefreshCw size={14} />} onClick={() => openCertificateSelection(record)} />
+            </Popover>
+          </Space>
+        );
+      },
+    },
+    {
       title: "状态",
       dataIndex: "status",
       key: "status",
@@ -593,7 +813,168 @@ export function ResignationManagementPage() {
           scroll={{ x: "max-content" }}
         />
       </SectionPanel>
-      <ConfirmResignationDrawer record={confirmRecord} onClose={() => setConfirmRecord(undefined)} onSubmit={submitConfirm} />
+      <ConfirmResignationDrawer
+        record={confirmRecord}
+        onClose={() => setConfirmRecord(undefined)}
+        onSubmit={submitConfirm}
+      />
+      <Modal
+        destroyOnClose
+        title="添加离职证明"
+        open={Boolean(certificateTemplateSelectRecord)}
+        onCancel={() => {
+          setCertificateTemplateSelectRecord(undefined);
+          setSelectedCertificateTemplateId(undefined);
+        }}
+        footer={
+          <Space>
+            <Button
+              onClick={() => {
+                setCertificateTemplateSelectRecord(undefined);
+                setSelectedCertificateTemplateId(undefined);
+              }}
+            >
+              取消
+            </Button>
+            <Button type="primary" disabled={!selectedCertificateTemplateId} onClick={enterCertificateTemplatePreview}>
+              添加离职证明
+            </Button>
+          </Space>
+        }
+        width={720}
+      >
+        <div className="resignation-template-select">
+          <div className="resignation-template-select__employee">
+            <span>员工</span>
+            <strong>{certificateTemplateSelectRecord?.name}</strong>
+            <span>{certificateTemplateSelectRecord?.department} / {certificateTemplateSelectRecord?.position}</span>
+          </div>
+          <Radio.Group
+            className="resignation-template-select__list"
+            value={selectedCertificateTemplateId}
+            onChange={(event) => setSelectedCertificateTemplateId(event.target.value)}
+          >
+            {resignationCertificateTemplates.map((template) => (
+              <Radio.Button className="resignation-template-option" value={template.id} key={template.id}>
+                <strong>{template.name}</strong>
+                <span>{template.fileName}</span>
+                <span>最近更新：{template.updatedAt}</span>
+              </Radio.Button>
+            ))}
+          </Radio.Group>
+        </div>
+      </Modal>
+      <Modal
+        destroyOnClose
+        title="模板文件预览"
+        open={Boolean(certificateTemplatePreview)}
+        onCancel={cancelCertificateTemplatePreview}
+        footer={
+          <Space>
+            <Button onClick={cancelCertificateTemplatePreview}>
+              关闭
+            </Button>
+            <Button icon={<Wand2 size={16} />} onClick={regenerateCertificateTemplatePreview}>
+              重新生成文件
+            </Button>
+            <Button type="primary" icon={<CheckCircle2 size={16} />} onClick={submitCertificateApproval}>
+              提交审批
+            </Button>
+          </Space>
+        }
+        width={1080}
+      >
+        {certificateTemplatePreview ? (
+          <div className="resignation-template-preview">
+            <div className="resignation-template-preview__document">
+              <div className="resignation-template-preview__toolbar">
+                <strong>{certificateTemplatePreview.template.name}</strong>
+                <span>{certificateTemplatePreview.template.fileName}</span>
+              </div>
+              <div className="resignation-certificate-preview__paper">
+                <h2>离职证明</h2>
+                <p>
+                  兹证明 {certificateTemplatePreview.values.employeeName}，员工编号 {certificateTemplatePreview.values.employeeNo}，于{" "}
+                  {certificateTemplatePreview.values.hireDate} 入职本公司。
+                </p>
+                <p>
+                  该员工担任 {certificateTemplatePreview.values.department} / {certificateTemplatePreview.values.position}，离职日期为{" "}
+                  {certificateTemplatePreview.values.resignationDate}。
+                </p>
+                <p>本证明由「{certificateTemplatePreview.template.name}」模板生成，以下内容将随离职人员信息自动填充。</p>
+                <p className="resignation-certificate-preview__seal">
+                  {certificateTemplatePreview.values.companyName}
+                  <br />
+                  {certificateTemplatePreview.values.issueDate}
+                </p>
+              </div>
+              <span className="resignation-template-preview__meta">预览生成时间：{certificateTemplatePreview.generatedAt}</span>
+            </div>
+            <div className="resignation-template-preview__fields">
+              <div className="resignation-template-preview__fields-title">
+                <strong>填充字段</strong>
+                <span>默认取当前离职单据，可临时调整后重新生成本次文件。</span>
+              </div>
+              <Form form={certificateTemplatePreviewForm} layout="vertical">
+                {resignationCertificatePlaceholderKeys.map((key) => (
+                  <Form.Item
+                    key={key}
+                    label={resignationCertificatePlaceholderLabels[key]}
+                    name={key}
+                    rules={[{ required: true, message: `请输入${resignationCertificatePlaceholderLabels[key]}` }]}
+                  >
+                    <Input />
+                  </Form.Item>
+                ))}
+              </Form>
+            </div>
+          </div>
+        ) : null}
+      </Modal>
+      <Modal
+        title="确认作废本次添加？"
+        open={certificatePreviewDiscardOpen}
+        onCancel={() => setCertificatePreviewDiscardOpen(false)}
+        onOk={discardCertificateTemplatePreview}
+        okText="确认作废"
+        cancelText="继续编辑"
+        zIndex={1200}
+      >
+        <p>关闭文件预览后，本次添加或重新生成离职证明将作废，列表不会更新。</p>
+      </Modal>
+      <Modal
+        title="离职证明预览"
+        open={Boolean(certificatePreview)}
+        onCancel={() => setCertificatePreview(undefined)}
+        footer={
+          <Space>
+            <Button onClick={() => setCertificatePreview(undefined)}>关闭</Button>
+            <Button type="primary" icon={<Download size={16} />} onClick={() => Modal.success({ title: "下载已开始", content: certificatePreview?.certificate.fileName })}>
+              下载
+            </Button>
+          </Space>
+        }
+        width={760}
+      >
+        {certificatePreview ? (
+          <div className="resignation-certificate-preview">
+            <div className="resignation-certificate-preview__paper">
+              <h2>离职证明</h2>
+              <p>兹证明 {certificatePreview.record.name}，员工编号 {certificatePreview.record.employeeNo}，于 {certificatePreview.record.hireDate} 入职本公司。</p>
+              <p>该员工担任 {certificatePreview.record.department} / {certificatePreview.record.position}，离职日期为 {certificatePreview.record.resignationDate}。</p>
+              <p>本证明根据模板「{certificatePreview.certificate.templateName}」生成，用印申请编号：{certificatePreview.certificate.sealApplicationNo}。</p>
+              <p className="resignation-certificate-preview__seal">成都拉森科技有限公司</p>
+            </div>
+          </div>
+        ) : null}
+      </Modal>
+      <ApprovalDetailDrawer
+        record={sealApprovalRecord}
+        canOperate={false}
+        showHandleType={false}
+        showDocumentState
+        onClose={() => setSealApprovalRecord(undefined)}
+      />
       <Modal
         destroyOnClose
         title="配置事项确认人"

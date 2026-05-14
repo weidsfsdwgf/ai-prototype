@@ -283,9 +283,7 @@
 }
 
 .performance-config-tags--clamped .ant-tag {
-  overflow: hidden;
-  max-width: 72px;
-  text-overflow: ellipsis;
+  flex: 0 0 auto;
   white-space: nowrap;
 }
 

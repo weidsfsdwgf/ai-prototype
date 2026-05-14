@@ -1,5 +1,16 @@
 export type RosterStatus = "试用期" | "正式" | "待离职" | "已离职";
 
+export type RosterArchiveMaterial = {
+  id: string;
+  fileName: string;
+  fileType: string;
+  sourceModule: string;
+  businessNo: string;
+  status: "已归档" | "同步中";
+  syncedAt: string;
+  updatedBy: string;
+};
+
 export type RosterRecord = {
   id: string;
   employeeNo: string;
@@ -20,6 +31,7 @@ export type RosterRecord = {
   responsibleHr: string;
   email: string;
   updatedAt: string;
+  archiveMaterials?: RosterArchiveMaterial[];
 };
 
 export const rosterRecords: RosterRecord[] = [
@@ -43,6 +55,18 @@ export const rosterRecords: RosterRecord[] = [
     responsibleHr: "林珊",
     email: "chenjia@example.com",
     updatedAt: "2026-04-29 16:20",
+    archiveMaterials: [
+      {
+        id: "FILE-EMP-1-001",
+        fileName: "陈嘉-劳动合同-2024.pdf",
+        fileType: "劳动合同",
+        sourceModule: "合同管理",
+        businessNo: "CON-202403-001",
+        status: "已归档",
+        syncedAt: "2024-03-12 18:20",
+        updatedBy: "林珊",
+      },
+    ],
   },
   {
     id: "EMP-2",
@@ -106,6 +130,71 @@ export const rosterRecords: RosterRecord[] = [
     responsibleHr: "林珊",
     email: "zhaoning@example.com",
     updatedAt: "2026-04-25 15:16",
+    archiveMaterials: [
+      {
+        id: "FILE-EMP-4-001",
+        fileName: "赵宁-离职证明.docx",
+        fileType: "离职证明",
+        sourceModule: "离职管理",
+        businessNo: "SEAL-202605-0004",
+        status: "同步中",
+        syncedAt: "2026-05-13 18:45",
+        updatedBy: "林珊",
+      },
+      {
+        id: "FILE-EMP-4-002",
+        fileName: "赵宁-离职事项确认单.pdf",
+        fileType: "离职材料",
+        sourceModule: "待办任务",
+        businessNo: "TODO-202605-0128",
+        status: "已归档",
+        syncedAt: "2026-05-12 17:30",
+        updatedBy: "系统同步",
+      },
+    ],
+  },
+  {
+    id: "EMP-5",
+    employeeNo: "LS0005",
+    name: "许佳",
+    area: "深圳",
+    phone: "13800010005",
+    departments: ["供应链中心"],
+    primaryDepartment: "供应链中心",
+    positions: ["供应链计划"],
+    rank: "M1",
+    directLeader: "陈嘉",
+    employeeType: "正式员工",
+    employeeStatus: "已离职",
+    hireDate: "2022-07-01",
+    expectedRegularDate: "2022-10-01",
+    regularDate: "2022-10-01",
+    workingYears: "3 年 8 个月",
+    responsibleHr: "林珊",
+    email: "xujia@example.com",
+    updatedAt: "2026-05-13 19:10",
+    archiveMaterials: [
+      {
+        id: "FILE-EMP-5-001",
+        fileName: "许佳-离职证明.docx",
+        fileType: "离职证明",
+        sourceModule: "离职管理",
+        businessNo: "SEAL-202605-0005",
+        status: "已归档",
+        syncedAt: "2026-05-13 19:02",
+        updatedBy: "林珊",
+      },
+      {
+        id: "FILE-EMP-5-002",
+        fileName: "许佳-劳动合同解除协议.pdf",
+        fileType: "离职材料",
+        sourceModule: "离职管理",
+        businessNo: "RS-202605-0005",
+        status: "已归档",
+        syncedAt: "2026-05-13 18:56",
+        updatedBy: "系统同步",
+      },
+    ],
   },
 ];
 

@@ -244,9 +244,46 @@
 .scorecard-form-block__header,
 .scorecard-content-toolbar {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
+}
+
+.scorecard-dimension-collapse {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.scorecard-dimension-collapse .ant-collapse-item {
+  border-bottom: 0;
+}
+
+.scorecard-dimension-collapse .ant-collapse-header {
+  align-items: flex-start !important;
+  padding: 14px 16px !important;
+}
+
+.scorecard-dimension-collapse .ant-collapse-header-text {
+  min-width: 0;
+}
+
+.scorecard-dimension-collapse .ant-collapse-content-box {
+  padding: 0 16px 16px !important;
+}
+
+.scorecard-dimension-collapse__header {
+  display: flex;
+  min-width: 0;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.scorecard-dimension-collapse__actions {
+  flex: 0 0 auto;
+  padding-bottom: 0;
 }
 
 .scorecard-system-field-selector {
@@ -383,16 +420,47 @@
   gap: 10px;
   border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: var(--color-neutral-soft);
+  background: var(--color-surface);
   padding: 12px;
+}
+
+.scorecard-form-nested .scorecard-standard-form-list {
+  border-left: 3px solid var(--color-primary-soft);
+  margin-left: 10px;
+  padding-left: 12px;
 }
 
 .scorecard-dimension-name {
   flex: 1;
 }
 
+.scorecard-item-form-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  border-radius: 6px;
+  background: var(--color-neutral-soft);
+  padding: 10px;
+}
+
 .scorecard-standard-form-row {
   grid-template-columns: minmax(0, 1fr) 140px auto;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 10px;
+}
+
+.scorecard-standard-form-row:last-of-type {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.scorecard-metric-selector {
+  display: grid;
+  gap: 14px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.scorecard-metric-selector .ant-table-wrapper {
+  min-width: 0;
 }
 
 @media (max-width: 1120px) {

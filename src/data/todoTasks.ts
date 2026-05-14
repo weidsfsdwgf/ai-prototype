@@ -67,7 +67,7 @@ export const todoTasks: TodoTask[] = [
     deadline: "2026-05-08 18:00",
     description: "请进入绩效详情完成上级评价。提交后系统将完成评价待办，并流转到绩效确认。",
     sourceDocumentNo: "PERF-202605-002",
-    targetPath: "/oa/hr/performance?record=PERF-202605-002",
+    targetPath: "/oa/performance/records?record=PERF-202605-002",
   },
   {
     id: "TODO-RES-1001",

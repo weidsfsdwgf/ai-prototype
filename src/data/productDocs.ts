@@ -12,7 +12,7 @@ export const productMenuDocs: ProductMenuDoc[] = [
     route: "/home",
     documentPath: "docs/product/home.md",
     status: "已建立",
-    updatedAt: "2026-04-30",
+    updatedAt: "2026-05-12",
   },
   {
     menu: "用户管理",
@@ -41,6 +41,13 @@ export const productMenuDocs: ProductMenuDoc[] = [
     documentPath: "docs/product/oa/system-management/user-groups.md",
     status: "已建立",
     updatedAt: "2026-04-30",
+  },
+  {
+    menu: "需求工单",
+    route: "/oa/project/requirement-tickets",
+    documentPath: "docs/product/oa/project/requirement-tickets.md",
+    status: "持续迭代",
+    updatedAt: "2026-05-13",
   },
   {
     menu: "花名册",
@@ -72,10 +79,10 @@ export const productMenuDocs: ProductMenuDoc[] = [
   },
   {
     menu: "绩效管理",
-    route: "/oa/hr/performance",
-    documentPath: "docs/product/oa/hr/performance-management.md",
+    route: "/oa/performance/records",
+    documentPath: "docs/product/oa/performance-management/performance-management.md",
     status: "持续迭代",
-    updatedAt: "2026-05-08",
+    updatedAt: "2026-05-12",
   },
   {
     menu: "OA申请",
@@ -114,9 +121,16 @@ export const productMenuDocs: ProductMenuDoc[] = [
   },
   {
     menu: "评分表配置",
-    route: "/oa/config/scorecards",
-    documentPath: "docs/product/oa/config-management/scorecard-config.md",
+    route: "/oa/performance/scorecards",
+    documentPath: "docs/product/oa/performance-management/scorecard-config.md",
     status: "持续迭代",
-    updatedAt: "2026-05-04",
+    updatedAt: "2026-05-12",
+  },
+  {
+    menu: "指标库",
+    route: "/oa/performance/metric-library",
+    documentPath: "docs/product/oa/performance-management/metric-library.md",
+    status: "持续迭代",
+    updatedAt: "2026-05-12",
   },
 ];

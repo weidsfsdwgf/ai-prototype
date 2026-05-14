@@ -335,6 +335,7 @@ function renderConfigTextCell(value: string) {
 
 function renderConfigTags(values: string[]) {
   const displayValues = values.length ? values : ["-"];
+  const displayText = displayValues.join("、");
 
   return (
     <Popover
@@ -345,9 +346,7 @@ function renderConfigTags(values: string[]) {
       )}
       mouseEnterDelay={0.3}
     >
-      <div className="performance-config-tags performance-config-tags--clamped">
-        {displayValues.map((value) => <Tag key={value}>{value}</Tag>)}
-      </div>
+      <span className="performance-config-cell-ellipsis">{displayText}</span>
     </Popover>
   );
 }
@@ -482,7 +481,7 @@ function ConfigDrawer({
     );
     setSelectedRuleId(nextRule.id);
     setPeopleTab("matched");
-    message.success(editingRule ? "绩效表配置已更新" : "绩效表配置已新增");
+    message.success(editingRule ? "绩效表匹配规则已更新" : "绩效表匹配规则已新增");
     closeEditor();
   };
 
@@ -576,32 +575,32 @@ function ConfigDrawer({
     {
       title: "适用对象",
       key: "objects",
-      width: 140,
+      width: 150,
       render: (_, record) => renderConfigTags(getRuleObjectNames(record)),
     },
     {
       title: "适用职级",
       key: "ranks",
-      width: 116,
+      width: 110,
       render: (_, record) => renderConfigTags(record.ranks),
     },
     {
       title: "绩效表模板",
       key: "templateId",
-      width: 140,
+      width: 128,
       render: (_, record) => renderConfigTextCell(scorecardTemplates.find((template) => template.id === record.templateId)?.name ?? "-"),
     },
     {
       title: "评价流程",
       key: "flowCode",
-      width: 122,
+      width: 116,
       render: (_, record) => renderConfigTextCell(getPerformanceFlowName(record.flowCode)),
     },
     { title: "绩效确认人", dataIndex: "confirmer", key: "confirmer", width: 96, render: (value: string) => renderConfigTextCell(value) },
     {
       title: "操作",
       key: "action",
-      width: 86,
+      width: 104,
       render: (_, record) => (
         <TableActions
           actions={[
@@ -634,7 +633,7 @@ function ConfigDrawer({
   return (
     <>
       <Drawer
-        title="绩效表配置"
+        title="绩效表匹配规则"
         open={open}
         onClose={closeConfigModal}
         width={1120}
@@ -1357,7 +1356,7 @@ export function PerformanceManagementPage() {
                     批量确认绩效
                   </Button>
                   <Button className="standard-list-filter__utility-action" icon={<FileCog size={16} />} onClick={() => setConfigOpen(true)}>
-                    绩效表配置
+                    绩效表匹配规则
                   </Button>
                 </Space>
               </div>

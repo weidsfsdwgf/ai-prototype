@@ -2,6 +2,7 @@ import {
   Alert,
   Button,
   Checkbox,
+  Collapse,
   DatePicker,
   Drawer,
   Empty,
@@ -46,6 +47,7 @@ import {
   type ScorecardTemplate,
   type ScorecardTemplateStatus,
 } from "../data/scorecardConfig";
+import { metricLibraryItems, type MetricLibraryItem } from "../data/metricLibrary";
 import "./Page.css";
 import "./ScorecardConfigPage.css";
 import "./standards/Standards.css";
@@ -65,6 +67,11 @@ type ScorecardFormValues = {
   customFields?: Array<Partial<ScorecardCustomField>>;
   raters?: Array<Partial<ScorecardRater>>;
   dimensions?: Array<Partial<ScorecardDimension>>;
+};
+
+type MetricLibraryFilterValues = {
+  keyword?: string;
+  category?: string;
 };
 
 const statusColor: Record<ScorecardTemplateStatus, string> = {
@@ -121,6 +128,10 @@ function getDimensionScore(dimension: ScorecardDimension) {
 
 function getTemplateScore(template: ScorecardTemplate) {
   return template.dimensions.reduce((sum, dimension) => sum + getDimensionScore(dimension), 0);
+}
+
+function getMetricScoreTotal(metric: MetricLibraryItem) {
+  return metric.standards.reduce((totalScore, standard) => totalScore + standard.score, 0);
 }
 
 function getEnabledFieldCount(template: ScorecardTemplate) {
@@ -216,6 +227,7 @@ function normalizeItems(items?: Array<Partial<ScorecardItem>>) {
     .filter((item) => item.name?.trim() || (item.standards?.length ?? 0) > 0)
     .map((item) => ({
       id: item.id ?? createId("item"),
+      metricId: item.metricId,
       name: item.name?.trim() ?? "",
       standards: normalizeStandards(item.standards),
     }));
@@ -364,16 +376,35 @@ export function ScorecardConfigPage() {
   const [editingTemplate, setEditingTemplate] = useState<ScorecardTemplate>();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [scoringTemplate, setScoringTemplate] = useState<ScorecardTemplate>();
+  const [metricSelectorOpen, setMetricSelectorOpen] = useState(false);
+  const [selectedMetricIds, setSelectedMetricIds] = useState<string[]>([]);
+  const [metricLibraryFilters, setMetricLibraryFilters] = useState<MetricLibraryFilterValues>({});
+  const [metricTargetDimensionIndex, setMetricTargetDimensionIndex] = useState<number>();
   const [form] = Form.useForm<ScorecardFormValues>();
   const [filterForm] = Form.useForm<FilterValues>();
+  const [metricFilterForm] = Form.useForm<MetricLibraryFilterValues>();
 
   const selectedTemplate = useMemo(
     () => templates.find((template) => template.id === selectedTemplateId) ?? templates[0],
     [selectedTemplateId, templates],
   );
+  const editingDimensions = Form.useWatch("dimensions", form) ?? [];
+  const existingMetricIds = useMemo(
+    () =>
+      new Set(
+        editingDimensions.flatMap((dimension) =>
+          (dimension.items ?? []).map((item) => item.metricId).filter((metricId): metricId is string => Boolean(metricId)),
+        ),
+      ),
+    [editingDimensions],
+  );
 
   const ownerOptions = useMemo(
     () => scorecardOwnerUsers.map((user) => ({ value: user.name, label: `${user.name}（${user.department}）` })),
+    [],
+  );
+  const metricCategoryOptions = useMemo(
+    () => Array.from(new Set(metricLibraryItems.map((metric) => metric.category))).map((item) => ({ value: item, label: item })),
     [],
   );
 
@@ -402,6 +433,19 @@ export function ScorecardConfigPage() {
         );
       }),
     [filters, templates],
+  );
+
+  const filteredLibraryMetrics = useMemo(
+    () =>
+      metricLibraryItems.filter((metric) => {
+        const keyword = metricLibraryFilters.keyword?.trim().toLowerCase();
+        const matchedKeyword = keyword
+          ? [metric.code, metric.name, metric.description].join(" ").toLowerCase().includes(keyword)
+          : true;
+
+        return metric.status === "启用中" && matchedKeyword && (!metricLibraryFilters.category || metric.category === metricLibraryFilters.category);
+      }),
+    [metricLibraryFilters],
   );
 
   const updateTemplateStatus = (template: ScorecardTemplate, status: ScorecardTemplateStatus) => {
@@ -442,6 +486,7 @@ export function ScorecardConfigPage() {
   const openEditor = (template?: ScorecardTemplate) => {
     setEditingTemplate(template);
     setDrawerOpen(true);
+    setSelectedMetricIds([]);
     form.resetFields();
     form.setFieldsValue(
       template
@@ -453,6 +498,57 @@ export function ScorecardConfigPage() {
             dimensions: [defaultDimensionValue],
           },
     );
+  };
+
+  const openMetricSelector = (dimensionIndex: number) => {
+    setSelectedMetricIds([]);
+    setMetricLibraryFilters({});
+    setMetricTargetDimensionIndex(dimensionIndex);
+    metricFilterForm.resetFields();
+    setMetricSelectorOpen(true);
+  };
+
+  const appendMetricsToCurrentTemplate = () => {
+    const selectedMetrics = metricLibraryItems.filter((metric) => selectedMetricIds.includes(metric.id));
+
+    if (selectedMetrics.length === 0) {
+      message.warning("请先选择需要加入评分表的指标");
+      return;
+    }
+
+    const currentDimensions = (form.getFieldValue("dimensions") ?? []) as Array<Partial<ScorecardDimension>>;
+    const nextDimensions = currentDimensions.map((dimension) => ({
+      ...dimension,
+      items: [...(dimension.items ?? [])],
+    }));
+    const targetDimension = metricTargetDimensionIndex === undefined ? undefined : nextDimensions[metricTargetDimensionIndex];
+
+    if (!targetDimension) {
+      message.warning("请先选择需要加入指标的考核维度");
+      return;
+    }
+
+    selectedMetrics.forEach((metric) => {
+      targetDimension.items = [
+        ...(targetDimension.items ?? []),
+        {
+          id: createId("item"),
+          metricId: metric.id,
+          name: metric.name,
+          standards: metric.standards.map((standard) => ({
+            id: createId("standard"),
+            description: standard.description,
+            score: standard.score,
+          })),
+        },
+      ];
+    });
+
+    form.setFieldValue("dimensions", nextDimensions);
+    setMetricSelectorOpen(false);
+    setMetricTargetDimensionIndex(undefined);
+    setSelectedMetricIds([]);
+    message.success(`已加入 ${selectedMetrics.length} 个指标`);
   };
 
   const handleEditorFinish = (values: ScorecardFormValues) => {
@@ -646,6 +742,26 @@ export function ScorecardConfigPage() {
           ]}
         />
       ),
+    },
+  ];
+
+  const metricSelectorColumns: ColumnsType<MetricLibraryItem> = [
+    { title: "指标编码", dataIndex: "code", key: "code", width: 150 },
+    { title: "指标名称（考核事项）", dataIndex: "name", key: "name", width: 180 },
+    { title: "指标分类", dataIndex: "category", key: "category", width: 120 },
+    { title: "取值方式", dataIndex: "valueMode", key: "valueMode", width: 120 },
+    {
+      title: "分数",
+      key: "score",
+      width: 80,
+      align: "right",
+      render: (_, record) => `${getMetricScoreTotal(record)} 分`,
+    },
+    {
+      title: "指标说明",
+      dataIndex: "description",
+      key: "description",
+      width: 250,
     },
   ];
 
@@ -854,67 +970,105 @@ export function ScorecardConfigPage() {
                           </Button>
                         </div>
                         {dimensionFields.map((dimensionField) => (
-                          <div className="scorecard-form-block" key={dimensionField.key}>
-                            <div className="scorecard-form-block__header">
-                              <Form.Item
-                                className="scorecard-dimension-name"
-                                name={[dimensionField.name, "name"]}
-                                rules={[{ required: true, message: "请输入考核维度" }]}
-                              >
-                                <Input placeholder="考核维度" />
-                              </Form.Item>
-                              <Button aria-label="删除维度" icon={<Trash2 size={16} />} onClick={() => remove(dimensionField.name)} />
-                            </div>
-                            <Form.List name={[dimensionField.name, "items"]}>
-                              {(itemFields, { add: addItem, remove: removeItem }) => (
-                                <div className="scorecard-form-list">
-                                  {itemFields.map((itemField) => (
-                                    <div className="scorecard-form-nested" key={itemField.key}>
-                                      <div className="scorecard-form-row">
-                                        <Form.Item name={[itemField.name, "name"]} rules={[{ required: true, message: "请输入考核事项" }]}>
-                                          <Input placeholder="考核事项" />
-                                        </Form.Item>
-                                        <Button aria-label="删除事项" icon={<Trash2 size={16} />} onClick={() => removeItem(itemField.name)} />
-                                      </div>
-                                      <Form.List name={[itemField.name, "standards"]}>
-                                        {(standardFields, { add: addStandard, remove: removeStandard }) => (
-                                          <div className="scorecard-standard-form-list">
-                                            {standardFields.map((standardField) => (
-                                              <div className="scorecard-form-row scorecard-standard-form-row" key={standardField.key}>
-                                                <Form.Item
-                                                  name={[standardField.name, "description"]}
-                                                  rules={[{ required: true, message: "请输入评分标准" }]}
-                                                >
-                                                  <Input placeholder="评分标准描述" />
+                          <Collapse
+                            className="scorecard-dimension-collapse"
+                            collapsible="icon"
+                            defaultActiveKey={[String(dimensionField.key)]}
+                            key={dimensionField.key}
+                            items={[
+                              {
+                                key: String(dimensionField.key),
+                                label: (
+                                  <div className="scorecard-dimension-collapse__header">
+                                    <Form.Item
+                                      className="scorecard-dimension-name"
+                                      label="考核维度"
+                                      name={[dimensionField.name, "name"]}
+                                      rules={[{ required: true, message: "请输入考核维度" }]}
+                                    >
+                                      <Input placeholder="考核维度" />
+                                    </Form.Item>
+                                    <Space wrap className="scorecard-dimension-collapse__actions">
+                                      <Button icon={<Plus size={16} />} onClick={() => openMetricSelector(dimensionField.name)}>
+                                        从指标库选择
+                                      </Button>
+                                      <Button aria-label="删除维度" icon={<Trash2 size={16} />} onClick={() => remove(dimensionField.name)} />
+                                    </Space>
+                                  </div>
+                                ),
+                                children: (
+                                  <Form.List name={[dimensionField.name, "items"]}>
+                                    {(itemFields, { add: addItem, remove: removeItem }) => (
+                                      <div className="scorecard-form-list">
+                                        {itemFields.map((itemField) => {
+                                          const libraryMetricItem = editingDimensions[dimensionField.name]?.items?.[itemField.name];
+                                          const isLibraryMetricItem = Boolean(libraryMetricItem?.metricId);
+
+                                          return (
+                                            <div className="scorecard-form-nested" key={itemField.key}>
+                                              <Form.Item hidden name={[itemField.name, "metricId"]}>
+                                                <Input />
+                                              </Form.Item>
+                                              <div className="scorecard-form-row scorecard-item-form-row">
+                                                <Form.Item label="考核事项" name={[itemField.name, "name"]} rules={[{ required: true, message: "请输入考核事项" }]}>
+                                                  <Input
+                                                    disabled={isLibraryMetricItem}
+                                                    placeholder="考核事项"
+                                                    suffix={isLibraryMetricItem ? <Tag color="blue">指标库</Tag> : null}
+                                                  />
                                                 </Form.Item>
-                                                <Form.Item
-                                                  name={[standardField.name, "score"]}
-                                                  rules={[{ required: true, message: "请输入分值" }]}
-                                                >
-                                                  <InputNumber min={0} precision={0} addonAfter="分" />
-                                                </Form.Item>
-                                                <Button
-                                                  aria-label="删除评分标准"
-                                                  icon={<Trash2 size={16} />}
-                                                  onClick={() => removeStandard(standardField.name)}
-                                                />
+                                                <Button aria-label="删除事项" icon={<Trash2 size={16} />} onClick={() => removeItem(itemField.name)} />
                                               </div>
-                                            ))}
-                                            <Button icon={<Plus size={16} />} onClick={() => addStandard({ description: "", score: 0 })}>
-                                              新增评分标准
-                                            </Button>
-                                          </div>
-                                        )}
-                                      </Form.List>
-                                    </div>
-                                  ))}
-                                  <Button icon={<Plus size={16} />} onClick={() => addItem({ name: "", standards: [{ description: "", score: 0 }] })}>
-                                    新增考核事项
-                                  </Button>
-                                </div>
-                              )}
-                            </Form.List>
-                          </div>
+                                              <Form.List name={[itemField.name, "standards"]}>
+                                                {(standardFields, { add: addStandard, remove: removeStandard }) => (
+                                                  <div className="scorecard-standard-form-list">
+                                                    {standardFields.map((standardField) => (
+                                                      <div className="scorecard-form-row scorecard-standard-form-row" key={standardField.key}>
+                                                        <Form.Item
+                                                          label="评分标准"
+                                                          name={[standardField.name, "description"]}
+                                                          rules={[{ required: true, message: "请输入评分标准" }]}
+                                                        >
+                                                          <Input disabled={isLibraryMetricItem} placeholder="评分标准描述" />
+                                                        </Form.Item>
+                                                        <Form.Item
+                                                          label="分值"
+                                                          name={[standardField.name, "score"]}
+                                                          rules={[{ required: true, message: "请输入分值" }]}
+                                                        >
+                                                          <InputNumber disabled={isLibraryMetricItem} min={0} precision={0} addonAfter="分" />
+                                                        </Form.Item>
+                                                        <Button
+                                                          aria-label="删除评分标准"
+                                                          disabled={isLibraryMetricItem}
+                                                          icon={<Trash2 size={16} />}
+                                                          onClick={() => removeStandard(standardField.name)}
+                                                        />
+                                                      </div>
+                                                    ))}
+                                                    <Button
+                                                      disabled={isLibraryMetricItem}
+                                                      icon={<Plus size={16} />}
+                                                      onClick={() => addStandard({ description: "", score: 0 })}
+                                                    >
+                                                      新增评分标准
+                                                    </Button>
+                                                  </div>
+                                                )}
+                                              </Form.List>
+                                            </div>
+                                          );
+                                        })}
+                                        <Button icon={<Plus size={16} />} onClick={() => addItem({ name: "", standards: [{ description: "", score: 0 }] })}>
+                                          新增考核事项
+                                        </Button>
+                                      </div>
+                                    )}
+                                  </Form.List>
+                                ),
+                              },
+                            ]}
+                          />
                         ))}
                       </div>
                     )}
@@ -925,6 +1079,61 @@ export function ScorecardConfigPage() {
           />
         </Form>
       </Drawer>
+
+      <Modal
+        destroyOnHidden
+        okText="加入评分表"
+        onCancel={() => {
+          setMetricSelectorOpen(false);
+          setMetricTargetDimensionIndex(undefined);
+        }}
+        onOk={appendMetricsToCurrentTemplate}
+        open={metricSelectorOpen}
+        title="从指标库选择指标"
+        width={920}
+      >
+        <div className="scorecard-metric-selector">
+          <Form form={metricFilterForm} layout="inline" onFinish={(values) => setMetricLibraryFilters(values)}>
+            <Form.Item name="keyword">
+              <Input allowClear placeholder="指标名称、编码" className="standard-list-filter__keyword" />
+            </Form.Item>
+            <Form.Item name="category">
+              <Select allowClear placeholder="指标分类" style={{ width: 140 }} options={metricCategoryOptions} />
+            </Form.Item>
+            <Form.Item>
+              <Space>
+                <Button htmlType="submit" type="primary" icon={<Filter size={16} />}>
+                  查询
+                </Button>
+                <Button
+                  icon={<RotateCcw size={16} />}
+                  onClick={() => {
+                    metricFilterForm.resetFields();
+                    setMetricLibraryFilters({});
+                  }}
+                >
+                  重置
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+          <Table
+            columns={metricSelectorColumns}
+            dataSource={filteredLibraryMetrics}
+            locale={{ emptyText: <Empty description="暂无可选指标" /> }}
+            pagination={{ pageSize: 6, total: filteredLibraryMetrics.length }}
+            rowKey="id"
+            rowSelection={{
+              selectedRowKeys: selectedMetricIds,
+              onChange: (keys) => setSelectedMetricIds(keys.map(String)),
+              getCheckboxProps: (record) => ({
+                disabled: existingMetricIds.has(record.id),
+              }),
+            }}
+            scroll={{ x: 900 }}
+          />
+        </div>
+      </Modal>
 
       <ScorecardScoringDrawer
         mode="preview"

@@ -22,15 +22,15 @@ type StandardPageRow = (typeof standardPages)[number];
 const overviewMetrics: Metric[] = [
   { label: "已规划系统", value: "4", change: "人事、供应链、运营、仓储", status: "healthy" },
   { label: "首批目录", value: "5", change: "OA 基础目录", status: "healthy" },
-  { label: "首批菜单", value: "12", change: "系统、人事、审批、资产与配置管理", status: "healthy" },
+  { label: "首批菜单", value: "16", change: "系统、人事、绩效、审批、资产", status: "healthy" },
   { label: "待接入模块", value: "3", change: "供应链、运营、仓储", status: "warning" },
 ];
 
 const moduleRows: ModuleRow[] = [
   {
     system: "OA",
-    directories: "系统管理、人事管理、审批管理、资产管理、配置管理",
-    menus: "用户管理、角色管理、岗位管理、用户组、花名册、组织架构、转正管理、OA申请、审批办理、我发起的、低值易耗品、评分表配置",
+    directories: "系统管理、人事管理、绩效管理、审批管理、资产管理",
+    menus: "用户管理、角色管理、岗位管理、用户组、花名册、组织架构、转正管理、离职管理、绩效管理、评分表配置、指标库、OA申请、审批办理、我发起的、待办任务、低值易耗品",
     owner: "信息中心",
     status: "已接入",
   },

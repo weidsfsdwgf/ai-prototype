@@ -3,12 +3,15 @@ import {
   Button,
   DatePicker,
   Drawer,
+  Empty,
   Form,
   Input,
   Modal,
+  Segmented,
   Select,
   Space,
   Table,
+  Tabs,
   Tag,
 } from "antd";
 import type { ColumnsType } from "antd/es/table/interface";
@@ -16,13 +19,15 @@ import dayjs from "dayjs";
 import { Download, Filter, Plus, RotateCcw, Save, Upload } from "lucide-react";
 import { useState } from "react";
 import { SectionPanel } from "../components/SectionPanel";
-import { TableActions } from "../components/TableActions";
-import { rosterRecords, rosterSelectOptions, type RosterRecord, type RosterStatus } from "../data/roster";
+import { TableActions, type TableActionItem } from "../components/TableActions";
+import { rosterRecords, rosterSelectOptions, type RosterArchiveMaterial, type RosterRecord, type RosterStatus } from "../data/roster";
+import { resignationReasonOptions, resignationTypeOptions } from "../data/resignationManagement";
 import "./Page.css";
 import "./RosterPage.css";
 import "./standards/Standards.css";
 
 type DrawerMode = "create" | "edit" | "detail";
+type RosterView = "active" | "resigned";
 
 type RosterField = {
   label: string;
@@ -125,6 +130,36 @@ const contractFields: RosterField[] = [
   { label: "劳动合同签订次数", name: "laborContractCount", kind: "readonly", help: "系统根据劳动合同信息自动计算。" },
 ];
 
+const archiveMaterialColumns: ColumnsType<RosterArchiveMaterial> = [
+  { title: "文件名称", dataIndex: "fileName", key: "fileName", width: 180 },
+  { title: "文件类型", dataIndex: "fileType", key: "fileType", width: 100 },
+  { title: "来源模块", dataIndex: "sourceModule", key: "sourceModule", width: 110 },
+  { title: "业务单号", dataIndex: "businessNo", key: "businessNo", width: 130 },
+  {
+    title: "同步状态",
+    dataIndex: "status",
+    key: "status",
+    width: 96,
+    render: (status: RosterArchiveMaterial["status"]) => <Tag color={status === "已归档" ? "green" : "blue"}>{status}</Tag>,
+  },
+  { title: "同步时间", dataIndex: "syncedAt", key: "syncedAt", width: 140 },
+  { title: "更新人", dataIndex: "updatedBy", key: "updatedBy", width: 90 },
+  {
+    title: "操作",
+    key: "action",
+    width: 84,
+    render: (_, material) => (
+      <Button
+        type="link"
+        size="small"
+        onClick={() => Modal.info({ title: "档案材料预览", content: `${material.fileName} / ${material.sourceModule}` })}
+      >
+        预览
+      </Button>
+    ),
+  },
+];
+
 const rosterFieldGroups = [
   { key: "base", title: "基础信息", fields: baseFields },
   { key: "employment", title: "任职信息", fields: employmentFields },
@@ -172,15 +207,18 @@ const columns: ColumnsType<RosterRecord> = [
     key: "action",
     width: 120,
     fixed: "right",
-    render: (_, record) => (
-      <TableActions
-        actions={[
-          { key: "detail", label: "详情", onClick: () => openRecordDrawer("detail", record) },
-          { key: "edit", label: "编辑", onClick: () => openRecordDrawer("edit", record) },
-          { key: "resign", label: "离职", danger: true, onClick: () => openResignConfirm(record) },
-        ]}
-      />
-    ),
+    render: (_, record) => {
+      const actions: TableActionItem[] = [
+        { key: "detail", label: "详情", onClick: () => openRecordDrawer("detail", record) },
+        { key: "edit", label: "编辑", onClick: () => openRecordDrawer("edit", record) },
+      ];
+
+      if (record.employeeStatus !== "已离职") {
+        actions.push({ key: "resign", label: "离职", danger: true, onClick: () => openResignConfirm(record) });
+      }
+
+      return <TableActions actions={actions} />;
+    },
   },
 ];
 
@@ -355,6 +393,24 @@ function renderDetailGroup(fields: RosterField[], values: Record<string, unknown
   );
 }
 
+function renderArchiveMaterials(record?: RosterRecord) {
+  const materials = record?.archiveMaterials ?? [];
+
+  if (!materials.length) {
+    return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无档案材料" />;
+  }
+
+  return (
+    <Table
+      columns={archiveMaterialColumns}
+      dataSource={materials}
+      pagination={false}
+      rowKey="id"
+      size="small"
+    />
+  );
+}
+
 function RosterDrawer({
   mode,
   record,
@@ -393,11 +449,33 @@ function RosterDrawer({
     >
       {readonly ? (
         <div className="roster-drawer__content">
-          {rosterFieldGroups.map((group) => (
-            <SectionPanel key={group.key} title={group.title}>
-              {renderDetailGroup(group.fields, initialValues)}
-            </SectionPanel>
-          ))}
+          <Tabs
+            className="standard-tabs roster-detail-tabs"
+            items={[
+              {
+                key: "profile",
+                label: "资料信息",
+                children: (
+                  <div className="roster-detail-tab-content">
+                    {rosterFieldGroups.map((group) => (
+                      <SectionPanel key={group.key} title={group.title}>
+                        {renderDetailGroup(group.fields, initialValues)}
+                      </SectionPanel>
+                    ))}
+                  </div>
+                ),
+              },
+              {
+                key: "materials",
+                label: "档案材料",
+                children: (
+                  <SectionPanel title="档案材料">
+                    {renderArchiveMaterials(record)}
+                  </SectionPanel>
+                ),
+              },
+            ]}
+          />
         </div>
       ) : (
         <Form className="roster-drawer__content" layout="vertical" initialValues={initialValues}>
@@ -426,9 +504,15 @@ export function RosterPage() {
   });
   const [batchOpen, setBatchOpen] = useState(false);
   const [resignRecord, setResignRecord] = useState<RosterRecord>();
+  const [rosterView, setRosterView] = useState<RosterView>("active");
+  const [resignForm] = Form.useForm();
 
   drawerDispatcher = (mode, record) => setDrawerState({ open: true, mode, record });
   resignDispatcher = (record) => setResignRecord(record);
+
+  const activeRecords = rosterRecords.filter((record) => record.employeeStatus !== "已离职");
+  const resignedRecords = rosterRecords.filter((record) => record.employeeStatus === "已离职");
+  const visibleRecords = rosterView === "active" ? activeRecords : resignedRecords;
 
   return (
     <main className="page">
@@ -491,11 +575,23 @@ export function RosterPage() {
           </Form.Item>
         </Form>
       </section>
-      <SectionPanel>
+      <SectionPanel
+        title={rosterView === "active" ? "在职员工" : "已离职员工"}
+        actions={
+          <Segmented
+            value={rosterView}
+            onChange={(value) => setRosterView(value as RosterView)}
+            options={[
+              { label: `在职员工 ${activeRecords.length}`, value: "active" },
+              { label: `已离职员工 ${resignedRecords.length}`, value: "resigned" },
+            ]}
+          />
+        }
+      >
         <Table
           columns={columns}
-          dataSource={rosterRecords}
-          pagination={{ current: 1, pageSize: 10, total: rosterRecords.length, showSizeChanger: true }}
+          dataSource={visibleRecords}
+          pagination={{ current: 1, pageSize: 10, total: visibleRecords.length, showSizeChanger: true }}
           rowKey="id"
           scroll={{ x: 1790 }}
         />
@@ -534,14 +630,71 @@ export function RosterPage() {
       <Modal
         title="确认办理离职"
         open={Boolean(resignRecord)}
-        onCancel={() => setResignRecord(undefined)}
-        onOk={() => setResignRecord(undefined)}
+        onCancel={() => {
+          setResignRecord(undefined);
+          resignForm.resetFields();
+        }}
+        onOk={async () => {
+          await resignForm.validateFields();
+          setResignRecord(undefined);
+          resignForm.resetFields();
+        }}
         okText="确认离职"
         okButtonProps={{ danger: true }}
+        width={860}
       >
-        <p>
-          将为 <strong>{resignRecord?.name}</strong> 发起离职操作，员工状态会进入待离职流程。
-        </p>
+        {resignRecord ? (
+          <Form
+            form={resignForm}
+            layout="vertical"
+            initialValues={{
+              name: resignRecord.name,
+              employeeNo: resignRecord.employeeNo,
+              department: resignRecord.primaryDepartment,
+              positionRank: `${resignRecord.positions[0] ?? "-"}-${resignRecord.rank}`,
+              hireDate: dateValue(resignRecord.hireDate),
+              resignationDate: dayjs(),
+              resignationType: "主动离职",
+              resignationReasons: [],
+            }}
+          >
+            <SectionPanel title="员工信息">
+              <div className="roster-form-grid">
+                <Form.Item label="姓名" name="name">
+                  <Input disabled />
+                </Form.Item>
+                <Form.Item label="员工编号" name="employeeNo">
+                  <Input disabled />
+                </Form.Item>
+                <Form.Item label="部门" name="department">
+                  <Input disabled />
+                </Form.Item>
+                <Form.Item label="岗位-职级" name="positionRank">
+                  <Input disabled />
+                </Form.Item>
+                <Form.Item label="入职日期" name="hireDate">
+                  <DatePicker disabled style={{ width: "100%" }} />
+                </Form.Item>
+              </div>
+            </SectionPanel>
+            <SectionPanel title="离职信息">
+              <div className="roster-form-grid">
+                <Form.Item label="离职日期" name="resignationDate" rules={[{ required: true, message: "请选择离职日期" }]}>
+                  <DatePicker style={{ width: "100%" }} />
+                </Form.Item>
+                <Form.Item label="离职类型" name="resignationType" rules={[{ required: true, message: "请选择离职类型" }]}>
+                  <Select options={resignationTypeOptions.map((item) => ({ value: item, label: item }))} />
+                </Form.Item>
+                <Form.Item label="离职原因" name="resignationReasons" rules={[{ required: true, message: "请选择离职原因" }]}>
+                  <Select mode="multiple" options={resignationReasonOptions.map((item) => ({ value: item, label: item }))} />
+                </Form.Item>
+                <Form.Item label="原因说明" name="reasonDescription">
+                  <Input.TextArea rows={3} />
+                </Form.Item>
+              </div>
+            </SectionPanel>
+          </Form>
+        ) : null}
       </Modal>
     </main>
   );

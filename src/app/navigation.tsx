@@ -5,6 +5,8 @@ import {
   Building2,
   ClipboardCheck,
   ContactRound,
+  Database,
+  FileText,
   LogOut,
   Home,
   IdCard,
@@ -80,6 +82,19 @@ export const navigationItems: NavigationItem[] = [
         ],
       },
       {
+        key: "oa-project",
+        label: "项目",
+        icon: <BriefcaseBusiness size={18} />,
+        children: [
+          {
+            key: "oa-project-requirement-tickets",
+            label: "需求工单",
+            path: "/oa/project/requirement-tickets",
+            icon: <FileText size={18} />,
+          },
+        ],
+      },
+      {
         key: "oa-hr",
         label: "人事管理",
         icon: <Building2 size={18} />,
@@ -109,10 +124,35 @@ export const navigationItems: NavigationItem[] = [
             icon: <LogOut size={18} />,
           },
           {
-            key: "oa-hr-performance",
+            key: "oa-hr-file-templates",
+            label: "文件模板管理",
+            path: "/oa/hr/file-templates",
+            icon: <FileText size={18} />,
+          },
+        ],
+      },
+      {
+        key: "oa-performance",
+        label: "绩效管理",
+        icon: <ListChecks size={18} />,
+        children: [
+          {
+            key: "oa-performance-records",
             label: "绩效管理",
-            path: "/oa/hr/performance",
+            path: "/oa/performance/records",
             icon: <ListChecks size={18} />,
+          },
+          {
+            key: "oa-performance-scorecards",
+            label: "评分表配置",
+            path: "/oa/performance/scorecards",
+            icon: <SlidersHorizontal size={18} />,
+          },
+          {
+            key: "oa-performance-metrics",
+            label: "指标库",
+            path: "/oa/performance/metric-library",
+            icon: <Database size={18} />,
           },
         ],
       },
@@ -157,19 +197,6 @@ export const navigationItems: NavigationItem[] = [
             label: "低值易耗品",
             path: "/oa/assets/low-value-consumables",
             icon: <Boxes size={18} />,
-          },
-        ],
-      },
-      {
-        key: "oa-config",
-        label: "配置管理",
-        icon: <SlidersHorizontal size={18} />,
-        children: [
-          {
-            key: "oa-config-scorecards",
-            label: "评分表配置",
-            path: "/oa/config/scorecards",
-            icon: <ListChecks size={18} />,
           },
         ],
       },

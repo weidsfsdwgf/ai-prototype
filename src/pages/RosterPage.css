@@ -1,11 +1,31 @@
 .roster-drawer .ant-drawer-body {
   background: var(--color-bg);
   padding: 20px;
+  overflow-x: hidden;
 }
 
 .roster-drawer__content {
   display: grid;
   gap: 16px;
+  min-width: 0;
+}
+
+.roster-detail-tabs,
+.roster-detail-tabs .ant-tabs-content,
+.roster-detail-tabs .ant-tabs-tabpane,
+.roster-detail-tabs .section-panel,
+.roster-detail-tabs .section-panel__body {
+  min-width: 0;
+}
+
+.roster-detail-tabs .ant-tabs-content-holder {
+  padding-top: 4px;
+}
+
+.roster-detail-tab-content {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
 }
 
 .roster-form-grid {
@@ -22,10 +42,47 @@
   margin-bottom: 16px;
 }
 
+.roster-certificate-preview {
+  padding: 16px;
+  background: var(--color-neutral-soft);
+}
+
+.roster-certificate-preview__paper {
+  display: grid;
+  gap: 14px;
+  min-height: 360px;
+  padding: 40px 56px;
+  border: 1px solid var(--color-border);
+  background: #ffffff;
+  color: var(--color-text);
+  line-height: 28px;
+}
+
+.roster-certificate-preview__paper h2 {
+  margin: 0 0 16px;
+  text-align: center;
+  font-size: 24px;
+}
+
+.roster-certificate-preview__paper p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.roster-certificate-preview__seal {
+  margin-top: 48px;
+  text-align: right;
+}
+
 .roster-detail-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px 20px;
+  min-width: 0;
+}
+
+.roster-detail-item {
+  min-width: 0;
 }
 
 .roster-detail-list dt {
@@ -39,6 +96,12 @@
   color: var(--color-text);
   font-size: 14px;
   line-height: 22px;
+  overflow-wrap: anywhere;
+}
+
+.roster-detail-tabs .ant-table-wrapper,
+.roster-detail-tabs .ant-table {
+  max-width: 100%;
 }
 
 @media (max-width: 1120px) {

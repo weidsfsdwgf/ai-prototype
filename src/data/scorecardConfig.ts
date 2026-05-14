@@ -37,6 +37,7 @@ export type ScorecardStandard = {
 
 export type ScorecardItem = {
   id: string;
+  metricId?: string;
   name: string;
   standards: ScorecardStandard[];
 };

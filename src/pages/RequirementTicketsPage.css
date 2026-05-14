@@ -1,0 +1,540 @@
+.requirement-ticket-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+
+.requirement-tickets-page {
+  min-height: calc(100vh - 96px);
+}
+
+.requirement-tickets-page .tree-list-layout {
+  align-items: stretch;
+  min-height: calc(100vh - 96px);
+}
+
+.requirement-tickets-page .tree-list-layout__tree,
+.requirement-tickets-page .tree-list-layout__list {
+  display: flex;
+  min-height: calc(100vh - 96px);
+  flex-direction: column;
+}
+
+.requirement-tickets-page .tree-list-layout__tree {
+  align-self: stretch;
+}
+
+.requirement-tickets-page .tree-list-layout__tree > .section-panel,
+.requirement-tickets-page .tree-list-layout__list > .section-panel {
+  flex: 1 1 auto;
+}
+
+.requirement-tickets-page .ant-table-thead > tr > th,
+.requirement-tickets-page .ant-table-tbody > tr > td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.requirement-ticket-form-grid__full {
+  grid-column: 1 / -1;
+}
+
+.requirement-category-node {
+  display: inline-flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.requirement-category-search {
+  margin-bottom: 12px;
+}
+
+.requirement-category-node__more {
+  flex: 0 0 auto;
+  opacity: 0;
+}
+
+.ant-tree-node-content-wrapper:hover .requirement-category-node__more,
+.ant-tree-node-selected .requirement-category-node__more {
+  opacity: 1;
+}
+
+.requirement-category-menu {
+  display: grid;
+  min-width: 148px;
+  gap: 4px;
+}
+
+.requirement-category-menu .ant-btn {
+  justify-content: flex-start;
+  padding-inline: 8px;
+}
+
+.requirement-ticket-drawer {
+  display: flex;
+  height: calc(100vh - 116px);
+  width: 100%;
+  min-height: 0;
+  min-width: 0;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.requirement-drawer-title {
+  display: inline-flex;
+  max-width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.requirement-drawer-title span {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.requirement-value-tag {
+  cursor: help;
+}
+
+.requirement-value-popover {
+  min-width: 280px;
+}
+
+.requirement-drawer-top {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.requirement-drawer-bottom {
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.requirement-drawer-bottom .ant-tabs {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.requirement-drawer-bottom .ant-tabs-content-holder,
+.requirement-drawer-bottom .ant-tabs-content,
+.requirement-drawer-bottom .ant-tabs-tabpane {
+  min-height: 0;
+  height: 100%;
+}
+
+.requirement-status-steps {
+  padding: 10px 10px 8px;
+  transform: translateY(3px);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-neutral-soft);
+}
+
+.requirement-status-steps .ant-steps-item-container {
+  display: grid;
+  align-items: center;
+}
+
+.requirement-status-steps .ant-steps-item-title {
+  padding-inline-end: 0 !important;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.requirement-detail-title {
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.requirement-ticket-drawer__tab {
+  display: grid;
+  gap: 16px;
+}
+
+.requirement-ticket-drawer__section {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+
+.requirement-ticket-drawer__section h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.requirement-section-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.requirement-section-title .ant-btn {
+  height: 28px;
+  padding: 0 4px;
+}
+
+.requirement-section-title__actions {
+  flex: 0 0 auto;
+}
+
+.requirement-ticket-flow {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.requirement-ticket-flow li {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-neutral-soft);
+}
+
+.requirement-ticket-flow__name {
+  color: var(--color-text-secondary);
+}
+
+.requirement-ticket-flow__approver {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.requirement-ticket-linked-table .ant-table {
+  font-size: 13px;
+}
+
+.requirement-inline-actions {
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.requirement-linked-ratio {
+  min-width: 34px;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+
+.requirement-send-button {
+  width: 26px;
+  color: var(--color-text-secondary);
+  border-color: transparent;
+  background: var(--color-primary-soft);
+  box-shadow: none;
+}
+
+.requirement-send-button:not(:disabled):hover {
+  color: var(--color-text-secondary) !important;
+  border-color: transparent !important;
+  background: var(--color-primary-soft) !important;
+}
+
+.requirement-existing-filter {
+  margin-bottom: 12px;
+}
+
+.requirement-linked-section {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+
+.requirement-linked-section .ant-table-wrapper,
+.requirement-linked-section .ant-spin-nested-loading,
+.requirement-linked-section .ant-spin-container,
+.requirement-linked-section .ant-table {
+  min-width: 0;
+}
+
+.requirement-linked-section .ant-table-cell {
+  overflow: hidden;
+  padding-inline: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.requirement-linked-section .ant-empty-normal {
+  margin-block: 8px;
+}
+
+.requirement-linked-section .ant-table-placeholder .ant-table-cell {
+  padding-block: 8px;
+}
+
+.requirement-comments-tab {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.requirement-comments-scroll,
+.requirement-tab-scroll {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.requirement-comments-scroll {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.requirement-comment-composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: flex-end;
+  padding-top: 12px;
+}
+
+.requirement-flow-records {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.requirement-flow-records li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 10px;
+  padding: 0 0 18px;
+}
+
+.requirement-flow-records li::before {
+  position: absolute;
+  top: 14px;
+  bottom: 0;
+  left: 5px;
+  width: 1px;
+  background: var(--color-border);
+  content: "";
+}
+
+.requirement-flow-records li:last-child::before {
+  display: none;
+}
+
+.requirement-flow-records__dot {
+  width: 11px;
+  height: 11px;
+  margin-top: 4px;
+  border: 2px solid var(--color-primary);
+  border-radius: 999px;
+  background: var(--color-surface);
+}
+
+.requirement-flow-records strong {
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.requirement-flow-records p {
+  margin: 4px 0;
+  color: var(--color-text);
+}
+
+.requirement-flow-records span {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.section-panel .ant-table-tbody > tr.ant-table-row {
+  cursor: pointer;
+}
+
+.requirement-number-button {
+  height: auto;
+  min-height: 0;
+  padding: 0;
+}
+
+.requirement-rich-editor {
+  display: grid;
+  gap: 0;
+}
+
+.requirement-rich-editor::before {
+  content: "需求描述";
+  margin-bottom: 8px;
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.requirement-rich-editor__toolbar {
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  background: var(--color-neutral-soft);
+}
+
+.requirement-rich-editor__body {
+  min-height: 128px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 0 0 8px 8px;
+  background: var(--color-surface);
+  outline: none;
+}
+
+.requirement-rich-editor__body:empty::before {
+  color: var(--color-text-secondary);
+  content: "填写需求描述，可粘贴富文本内容";
+}
+
+.requirement-checkbox-stack {
+  display: grid;
+  gap: 8px;
+}
+
+.requirement-checkbox-stack .ant-checkbox-wrapper {
+  align-items: flex-start;
+}
+
+.requirement-value-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.requirement-value-checks {
+  display: block;
+  width: 100%;
+}
+
+.requirement-value-item {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 12px 0;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-neutral-soft);
+}
+
+.requirement-value-item .ant-form-item {
+  margin-bottom: 12px;
+}
+
+.requirement-link-mode {
+  margin-bottom: 16px;
+}
+
+.requirement-comments {
+  display: grid;
+  gap: 10px;
+}
+
+.requirement-comment {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.requirement-comment__avatar {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.requirement-comment__main {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.requirement-comment__meta {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.requirement-comment__meta strong {
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.requirement-comment__meta span {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.requirement-comment p,
+.requirement-comment__main div {
+  margin: 0;
+}
+
+.requirement-comment--description div {
+  color: var(--color-text);
+}
+
+.requirement-comment--description p {
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 720px) {
+  .requirement-ticket-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .requirement-value-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .requirement-ticket-flow li {
+    grid-template-columns: 1fr;
+  }
+}
