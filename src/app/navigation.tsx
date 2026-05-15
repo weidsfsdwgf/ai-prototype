@@ -1,5 +1,6 @@
 import {
   Archive,
+  BarChart3,
   Boxes,
   BriefcaseBusiness,
   Building2,
@@ -82,19 +83,6 @@ export const navigationItems: NavigationItem[] = [
         ],
       },
       {
-        key: "oa-project",
-        label: "项目",
-        icon: <BriefcaseBusiness size={18} />,
-        children: [
-          {
-            key: "oa-project-requirement-tickets",
-            label: "需求工单",
-            path: "/oa/project/requirement-tickets",
-            icon: <FileText size={18} />,
-          },
-        ],
-      },
-      {
         key: "oa-hr",
         label: "人事管理",
         icon: <Building2 size={18} />,
@@ -156,44 +144,84 @@ export const navigationItems: NavigationItem[] = [
           },
         ],
       },
+    ],
+  },
+  {
+    key: "project",
+    label: "项目",
+    icon: <BriefcaseBusiness size={18} />,
+    children: [
       {
-        key: "oa-approval",
+        key: "project-management",
+        label: "项目",
+        icon: <BriefcaseBusiness size={18} />,
+        children: [
+          {
+            key: "project-dashboard",
+            label: "项目看板",
+            path: "/oa/project/dashboard",
+            icon: <BarChart3 size={18} />,
+          },
+          {
+            key: "project-requirement-tickets",
+            label: "需求工单",
+            path: "/oa/project/requirement-tickets",
+            icon: <FileText size={18} />,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    key: "todo",
+    label: "待办",
+    icon: <ListTodo size={18} />,
+    children: [
+      {
+        key: "todo-approval",
         label: "审批管理",
         icon: <ClipboardCheck size={18} />,
         children: [
           {
-            key: "oa-approval-applications",
+            key: "todo-approval-applications",
             label: "OA申请",
             path: "/oa/approval/applications",
             icon: <Send size={18} />,
           },
           {
-            key: "oa-approval-handling",
+            key: "todo-approval-handling",
             label: "审批办理",
             path: "/oa/approval/handling",
             icon: <ClipboardCheck size={18} />,
           },
           {
-            key: "oa-approval-initiated",
+            key: "todo-approval-initiated",
             label: "我发起的",
             path: "/oa/approval/initiated",
             icon: <Send size={18} />,
           },
           {
-            key: "oa-approval-todos",
+            key: "todo-approval-todos",
             label: "待办任务",
             path: "/oa/approval/todos",
             icon: <ListTodo size={18} />,
           },
         ],
       },
+    ],
+  },
+  {
+    key: "finance",
+    label: "财务",
+    icon: <Archive size={18} />,
+    children: [
       {
-        key: "oa-assets",
+        key: "finance-assets",
         label: "资产管理",
         icon: <Archive size={18} />,
         children: [
           {
-            key: "oa-assets-low-value-consumables",
+            key: "finance-assets-low-value-consumables",
             label: "低值易耗品",
             path: "/oa/assets/low-value-consumables",
             icon: <Boxes size={18} />,

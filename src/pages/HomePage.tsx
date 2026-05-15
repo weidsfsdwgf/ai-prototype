@@ -20,17 +20,38 @@ type ModuleRow = {
 type StandardPageRow = (typeof standardPages)[number];
 
 const overviewMetrics: Metric[] = [
-  { label: "已规划系统", value: "4", change: "人事、供应链、运营、仓储", status: "healthy" },
-  { label: "首批目录", value: "5", change: "OA 基础目录", status: "healthy" },
-  { label: "首批菜单", value: "16", change: "系统、人事、绩效、审批、资产", status: "healthy" },
+  { label: "已接入一级目录", value: "4", change: "OA、项目、待办、财务", status: "healthy" },
+  { label: "已接入二级目录", value: "7", change: "系统、人事、绩效、项目、审批、资产", status: "healthy" },
+  { label: "已接入菜单", value: "19", change: "含项目看板、待办、低值易耗品", status: "healthy" },
   { label: "待接入模块", value: "3", change: "供应链、运营、仓储", status: "warning" },
 ];
 
 const moduleRows: ModuleRow[] = [
   {
     system: "OA",
-    directories: "系统管理、人事管理、绩效管理、审批管理、资产管理",
-    menus: "用户管理、角色管理、岗位管理、用户组、花名册、组织架构、转正管理、离职管理、绩效管理、评分表配置、指标库、OA申请、审批办理、我发起的、待办任务、低值易耗品",
+    directories: "系统管理、人事管理、绩效管理",
+    menus: "用户管理、角色管理、岗位管理、用户组、花名册、组织架构、转正管理、离职管理、文件模板管理、绩效管理、评分表配置、指标库",
+    owner: "信息中心",
+    status: "已接入",
+  },
+  {
+    system: "项目",
+    directories: "项目",
+    menus: "项目看板、需求工单",
+    owner: "信息中心",
+    status: "已接入",
+  },
+  {
+    system: "待办",
+    directories: "审批管理",
+    menus: "OA申请、审批办理、我发起的、待办任务",
+    owner: "信息中心",
+    status: "已接入",
+  },
+  {
+    system: "财务",
+    directories: "资产管理",
+    menus: "低值易耗品",
     owner: "信息中心",
     status: "已接入",
   },
@@ -58,7 +79,7 @@ const moduleRows: ModuleRow[] = [
 ];
 
 const columns: ColumnsType<ModuleRow> = [
-  { title: "系统", dataIndex: "system", key: "system", width: 120 },
+  { title: "一级目录", dataIndex: "system", key: "system", width: 120 },
   { title: "目录", dataIndex: "directories", key: "directories", width: 220 },
   { title: "菜单", dataIndex: "menus", key: "menus", minWidth: 320 },
   { title: "负责人", dataIndex: "owner", key: "owner", width: 140 },
@@ -139,7 +160,7 @@ export function HomePage() {
           <MetricCard key={metric.label} {...metric} />
         ))}
       </section>
-      <SectionPanel title="系统接入概览">
+      <SectionPanel title="一级目录接入概览">
         <Table
           columns={columns}
           dataSource={moduleRows}

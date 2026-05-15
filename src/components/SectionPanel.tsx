@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import "./SectionPanel.css";
 
 type SectionPanelProps = {
-  title?: string;
+  title?: ReactNode;
   description?: string;
   actions?: ReactNode;
   children: ReactNode;

@@ -4,12 +4,12 @@
 
 | 项 | 内容 |
 | --- | --- |
-| 所属系统 | OA |
+| 所属系统 | 待办 |
 | 一级目录 | 审批管理 |
 | 二级目录 | OA申请 |
 | 菜单路由 | `/oa/approval/applications` |
 | 文档状态 | 持续迭代 |
-| 最近更新 | 2026-05-05 |
+| 最近更新 | 2026-05-15 |
 
 ## 当前需求
 
@@ -78,7 +78,7 @@
 - 页面样式：`src/pages/OaApplicationPage.css`。
 - 示例数据：`src/data/oaApplicationCenter.ts` 中的 `oaApplicationTypes` 和 `oaApplicationRecords`，离职申请专属数据在 `src/data/resignationManagement.ts`。
 - 复用样式：`src/pages/standards/Standards.css`、`src/pages/ApprovalPages.css`、`src/pages/Page.css`。
-- 菜单已调整为 `审批管理 / OA申请`。
+- 菜单已调整为 `待办 / 审批管理 / OA申请`。
 
 ## 待确认问题
 
@@ -91,6 +91,7 @@
 
 | 日期 | 版本 | 变更 |
 | --- | --- | --- |
+| 2026-05-15 | v1.5 | 菜单归属从 OA 调整到 `待办 > 审批管理`，同步更新产品文档登记。 |
 | 2026-05-05 | v1.1 | 风险确认从离职申请列表移至审批详情，按确认单据展示事项和处理详情。 |
 | 2026-05-05 | v1.2 | 离职审批详情接管审批信息内容，展示离职申请字段，并在同一容器内优化展示离职事项确认。 |
 | 2026-05-05 | v1.3 | 离职事项展示精简为事项和完成情况，移除执行动作、风险判定等过程字段。 |

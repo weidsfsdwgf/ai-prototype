@@ -11,6 +11,7 @@ import { OaApplicationPage } from "../pages/OaApplicationPage";
 import { OrgStructurePage } from "../pages/OrgStructurePage";
 import { PerformanceManagementPage } from "../pages/PerformanceManagementPage";
 import { ProbationManagementPage } from "../pages/ProbationManagementPage";
+import { ProjectDashboardPage } from "../pages/ProjectDashboardPage";
 import { RequirementTicketsPage } from "../pages/RequirementTicketsPage";
 import { ResignationManagementPage } from "../pages/ResignationManagementPage";
 import { RosterPage } from "../pages/RosterPage";
@@ -36,6 +37,7 @@ export const router = createBrowserRouter([
       { path: "oa/system/roles", element: <AdminManagementPage pageKey="roles" /> },
       { path: "oa/system/positions", element: <AdminManagementPage pageKey="positions" /> },
       { path: "oa/system/groups", element: <AdminManagementPage pageKey="groups" /> },
+      { path: "oa/project/dashboard", element: <ProjectDashboardPage /> },
       { path: "oa/project/requirement-tickets", element: <RequirementTicketsPage /> },
       { path: "oa/hr/roster", element: <RosterPage /> },
       { path: "oa/hr/org-structure", element: <OrgStructurePage /> },
