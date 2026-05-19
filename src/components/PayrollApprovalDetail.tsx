@@ -25,6 +25,8 @@ import type {
 
 type PayrollApprovalDetailProps = {
   info: PayrollApprovalInfo;
+  toolbarExtra?: ReactNode;
+  showTitle?: boolean;
 };
 
 type PayrollView = "department" | "employee";
@@ -94,6 +96,24 @@ function flattenDepartments(departments: PayrollDepartmentRecord[]): PayrollDepa
   ]);
 }
 
+function findDepartmentPath(departments: PayrollDepartmentRecord[], name: string, parents: string[] = []): string[] {
+  for (const department of departments) {
+    const currentPath = [...parents, department.name];
+
+    if (department.name === name) {
+      return currentPath;
+    }
+
+    const childPath = findDepartmentPath(department.children ?? [], name, currentPath);
+
+    if (childPath.length > 0) {
+      return childPath;
+    }
+  }
+
+  return [];
+}
+
 function uniqueOptions(values: string[]) {
   return Array.from(new Set(values)).map((value) => ({ text: value, value }));
 }
@@ -103,6 +123,10 @@ function getEmployeeActualSalary(record: PayrollEmployeeRecord, editableFields: 
 }
 
 function detailList(items: DetailItem[]) {
+  if (items.length === 0) {
+    return <span className="payroll-detail-empty">无明细</span>;
+  }
+
   return (
     <dl className="payroll-detail-list">
       {items.map((item) => (
@@ -243,7 +267,88 @@ function getOtherDeductionDetails(record: PayrollEmployeeRecord) {
   ];
 }
 
+function getFixedSalaryPart(record: PayrollEmployeeRecord) {
+  const kpiBase = getDetailNumber(record.kpiDetails, "KPI 工资") || getDetailNumber(record.kpiDetails, "绩效工资");
+
+  return Math.max(record.salaryTotal - kpiBase - 100, 0);
+}
+
+function getEmployeeAttendanceText(record: PayrollEmployeeRecord) {
+  return `${formatNumber(record.actualAttendance)}/${formatNumber(record.expectedAttendance)}`;
+}
+
+function getEmployeeLeaveDetails(record: PayrollEmployeeRecord) {
+  const labels = ["事假", "年假", "病假", "婚嫁/陪产假/产假/丧假"];
+  return filterNonZeroDetails(labels.map((label) => ({ label, value: getDetailValue(record.leaveDetails, label) })));
+}
+
+function getEmployeeCommissionDetails(record: PayrollEmployeeRecord) {
+  return [
+    ...getCommissionPaidDetails(record),
+    ...getRemainingCommissionDetails(record),
+  ];
+}
+
+function getEmployeeComprehensiveSubsidyDetails(record: PayrollEmployeeRecord) {
+  return [
+    { label: "实发学历补贴", value: getDetailValue(record.comprehensiveSubsidyDetails, "实发学历补贴") },
+    { label: "实发管理补贴", value: getDetailValue(record.comprehensiveSubsidyDetails, "实发管理补贴") },
+    { label: "实发来厦补贴", value: getDetailValue(record.comprehensiveSubsidyDetails, "实发来厦补贴") },
+    moneyItem("保底提成补贴", getDetailNumber(record.businessSubsidyDetails, "保底提成补贴")),
+  ];
+}
+
+function getEmployeeBonusDetails(record: PayrollEmployeeRecord) {
+  const labels = ["爆款奖金", "培训导师奖金", "内推奖金", "年会奖金", "优秀标兵"];
+  return filterNonZeroDetails(labels.map((label) => ({ label, value: getDetailValue(record.bonusDetails, label) })));
+}
+
+function getEmployeeBonusTotal(record: PayrollEmployeeRecord) {
+  return sumDetailItems(getEmployeeBonusDetails(record));
+}
+
+function getEmployeeWelfareSubsidyDetails(record: PayrollEmployeeRecord) {
+  return filterNonZeroDetails([...getWelfareSubsidyDetails(record), ...getAttendanceSubsidyDetails(record)]);
+}
+
+function getEmployeeDeductionDetails(record: PayrollEmployeeRecord, value: number) {
+  const details = record.withholdingDeductionDetails.length > 0 ? record.withholdingDeductionDetails : getOtherDeductionDetails(record);
+
+  if (details.length > 0) {
+    return details;
+  }
+
+  return [
+    moneyItem("五险（个人）", Math.round(value * 0.36)),
+    moneyItem("公积金（个人）", Math.round(value * 0.28)),
+    moneyItem("上月个税退还", 0),
+    moneyItem("扣除个税", value - Math.round(value * 0.64)),
+  ];
+}
+
 function getNameState(record: PayrollEmployeeRecord) {
+  if (record.resignationDate) {
+    return {
+      className: "payroll-resigned-name",
+      title: `${record.name} 离职信息`,
+      content: `离职日期：${record.resignationDate}`,
+    };
+  }
+
+  if (record.expectedRegularDate) {
+    return {
+      className: "payroll-probation-name",
+      title: `${record.name} 试用期信息`,
+      content: `预计转正日期：${record.expectedRegularDate}`,
+    };
+  }
+
+  return { className: "payroll-inline-link" };
+}
+
+void getNameState;
+
+function getEmployeeNameState(record: PayrollEmployeeRecord) {
   if (record.resignationDate) {
     return {
       className: "payroll-resigned-name",
@@ -354,18 +459,37 @@ function buildEmployeeTreeData(
     }, []);
 }
 
-function buildDepartmentTreeData(departments: PayrollDepartmentRecord[], employees: PayrollEmployeeRecord[]): DataNode[] {
-  return departments.map((department) => ({
-    key: makeDepartmentKey(department.name),
-    title: (
-      <span className="payroll-tree-title">
-        <span>{department.name}</span>
-        <span className="payroll-tree-count">({countDepartmentEmployees(department, employees)})</span>
-      </span>
-    ),
-    icon: <DepartmentIcon />,
-    children: department.children ? buildDepartmentTreeData(department.children, employees) : undefined,
-  }));
+function buildDepartmentTreeData(
+  departments: PayrollDepartmentRecord[],
+  employees: PayrollEmployeeRecord[],
+  query = "",
+): DataNode[] {
+  const keyword = query.trim().toLowerCase();
+
+  return departments.reduce<DataNode[]>((nodes, department) => {
+    const departmentMatched = keyword ? department.name.toLowerCase().includes(keyword) : true;
+    const children = department.children
+      ? buildDepartmentTreeData(department.children, employees, departmentMatched ? "" : query)
+      : undefined;
+
+    if (!departmentMatched && (!children || children.length === 0)) {
+      return nodes;
+    }
+
+    nodes.push({
+      key: makeDepartmentKey(department.name),
+      title: (
+        <span className="payroll-tree-title">
+          <span>{department.name}</span>
+          <span className="payroll-tree-count">({countDepartmentEmployees(department, employees)})</span>
+        </span>
+      ),
+      icon: <DepartmentIcon />,
+      children,
+    });
+
+    return nodes;
+  }, []);
 }
 
 function toFlatDepartmentRecord(department: PayrollDepartmentRecord): PayrollDepartmentRecord {
@@ -387,11 +511,15 @@ function makeDescriptionItem(key: string, label: string, children: ReactNode) {
   return { key, label, children };
 }
 
-export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
+export function PayrollApprovalDetail({ info, toolbarExtra, showTitle = true }: PayrollApprovalDetailProps) {
   const [activeView, setActiveView] = useState<PayrollView>("department");
   const [departmentView, setDepartmentView] = useState<DepartmentView>("tree");
   const [visibleLevels, setVisibleLevels] = useState<LevelFilterValue[]>([]);
   const [flatDepartmentKeys, setFlatDepartmentKeys] = useState<TreeFilterKey[]>([]);
+  const [flatDepartmentSearch, setFlatDepartmentSearch] = useState("");
+  const [flatExpandedDepartmentKeys, setFlatExpandedDepartmentKeys] = useState<TreeFilterKey[]>(() =>
+    flattenDepartments(info.departments).map((department) => makeDepartmentKey(department.name)),
+  );
   const [expandedDepartmentRowKeys, setExpandedDepartmentRowKeys] = useState<string[]>(() =>
     flattenDepartments(info.departments).map((department) => department.id),
   );
@@ -452,6 +580,10 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
     () => buildEmployeeTreeData(info.departments, info.employees, treeSearch),
     [info.departments, info.employees, treeSearch],
   );
+  const flatDepartmentTreeData = useMemo(
+    () => buildDepartmentTreeData(info.departments, info.employees, flatDepartmentSearch),
+    [flatDepartmentSearch, info.departments, info.employees],
+  );
   const defaultExpandedDepartmentKeys = useMemo(
     () => departments.map((department) => makeDepartmentKey(department.name)),
     [departments],
@@ -463,6 +595,7 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
 
   useEffect(() => {
     setExpandedTreeKeys(defaultExpandedDepartmentKeys);
+    setFlatExpandedDepartmentKeys(defaultExpandedDepartmentKeys);
   }, [defaultExpandedDepartmentKeys]);
 
   useEffect(() => {
@@ -736,7 +869,7 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       width: 92,
       fixed: "left",
       render: (name: string, record, index) => {
-        const nameState = getNameState(record);
+        const nameState = getEmployeeNameState(record);
         const nameButton = (
           <Button type="link" className={nameState.className} onClick={() => setEmployeeDetail(record)}>
             {name}
@@ -770,10 +903,19 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       title: "部门",
       dataIndex: "department",
       key: "department",
-      width: 102,
+      width: 112,
       filters: uniqueOptions(info.employees.map((employee) => employee.department)),
       filteredValue: filteredInfo.department ?? null,
       onFilter: (value, record) => record.department === value,
+      render: (value: string) => {
+        const path = findDepartmentPath(info.departments, value).join("/");
+
+        return (
+          <Popover content={path || value} trigger="hover">
+            <span className="payroll-cell-ellipsis">{value}</span>
+          </Popover>
+        );
+      },
     },
     {
       title: "岗位",
@@ -807,7 +949,7 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       title: "薪资结构",
       dataIndex: "salaryStructure",
       key: "salaryStructure",
-      width: 150,
+      width: 180,
       render: (value: string) => (
         <Popover content={value} trigger="hover">
           <span className="payroll-cell-ellipsis">{value}</span>
@@ -815,20 +957,11 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       ),
     },
     {
-      title: "应出勤天数",
-      dataIndex: "expectedAttendance",
-      key: "expectedAttendance",
-      width: 84,
+      title: "出勤",
+      key: "attendance",
+      width: 76,
       align: "right",
-      render: formatNumber,
-    },
-    {
-      title: "实出勤天数",
-      dataIndex: "actualAttendance",
-      key: "actualAttendance",
-      width: 84,
-      align: "right",
-      render: formatNumber,
+      render: (_, record) => getEmployeeAttendanceText(record),
     },
     {
       title: "请假天数",
@@ -837,29 +970,43 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       width: 84,
       align: "right",
       render: (value: number, record) => (
-        <DetailValue title={`${record.name} 假勤明细`} value={value} items={record.leaveDetails} />
+        <DetailValue title={`${record.name} 请假明细`} value={value} items={getEmployeeLeaveDetails(record)} />
       ),
     },
     { title: "迟到次数", dataIndex: "lateCount", key: "lateCount", width: 76, align: "right" },
     { title: "补卡次数", dataIndex: "clockRepairCount", key: "clockRepairCount", width: 76, align: "right" },
     {
-      title: "加班",
+      title: "加班(H)",
       dataIndex: "overtime",
       key: "overtime",
-      width: 64,
+      width: 76,
       align: "right",
       render: (value: number, record) => (
         <DetailValue title={`${record.name} 加班明细`} value={value} items={getOvertimeDetails(record)} />
       ),
     },
     {
-      title: "实发 KPI",
+      title: "固定部分(除绩效、餐补)",
+      key: "fixedSalaryPart",
+      width: 140,
+      align: "right",
+      render: (_, record) => formatMoney(getFixedSalaryPart(record)),
+    },
+    {
+      title: "绩效分数",
+      key: "kpiScore",
+      width: 80,
+      align: "right",
+      render: (_, record) => formatNumber(getKpiScore(record)),
+    },
+    {
+      title: "实发绩效",
       dataIndex: "kpiPaid",
       key: "kpiPaid",
       width: 84,
       align: "right",
       render: (value: number, record) => (
-        <DetailValue title={`${record.name} KPI 明细`} value={formatMoney(value)} items={record.kpiDetails} />
+        <DetailValue title={`${record.name} 绩效明细`} value={formatMoney(value)} items={record.kpiDetails} />
       ),
     },
     {
@@ -869,17 +1016,7 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       width: 88,
       align: "right",
       render: (value: number, record) => (
-        <DetailValue title={`${record.name} 提成明细`} value={formatMoney(value)} items={getCommissionPaidDetails(record)} />
-      ),
-    },
-    {
-      title: "剩余提成",
-      dataIndex: "remainingCommission",
-      key: "remainingCommission",
-      width: 88,
-      align: "right",
-      render: (value: number, record) => (
-        <DetailValue title={`${record.name} 剩余提成明细`} value={formatMoney(value)} items={getRemainingCommissionDetails(record)} />
+        <DetailValue title={`${record.name} 提成明细`} value={formatMoney(value)} items={getEmployeeCommissionDetails(record)} />
       ),
     },
     {
@@ -891,22 +1028,8 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       render: (_, record) => (
         <DetailValue
           title={`${record.name} 综合补贴明细`}
-          value={formatMoney(sumDetailItems(getComprehensiveSubsidyDetails(record)))}
-          items={getComprehensiveSubsidyDetails(record)}
-        />
-      ),
-    },
-    {
-      title: "假勤补贴",
-      dataIndex: "attendanceSubsidy",
-      key: "attendanceSubsidy",
-      width: 108,
-      align: "right",
-      render: (_, record) => (
-        <DetailValue
-          title={`${record.name} 假勤补贴明细`}
-          value={formatMoney(sumDetailItems(getAttendanceSubsidyDetails(record)))}
-          items={getAttendanceSubsidyDetails(record)}
+          value={formatMoney(sumDetailItems(getEmployeeComprehensiveSubsidyDetails(record)))}
+          items={getEmployeeComprehensiveSubsidyDetails(record)}
         />
       ),
     },
@@ -917,7 +1040,7 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       width: 70,
       align: "right",
       render: (_, record) => (
-        <DetailValue title={`${record.name} 奖金明细`} value={formatMoney(getBonusTotal(record))} items={filterNonZeroDetails(getBonusDetails(record))} />
+        <DetailValue title={`${record.name} 奖金明细`} value={formatMoney(getEmployeeBonusTotal(record))} items={getEmployeeBonusDetails(record)} />
       ),
     },
     {
@@ -929,8 +1052,8 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
       render: (_, record) => (
         <DetailValue
           title={`${record.name} 福利补贴明细`}
-          value={formatMoney(getWelfareSubsidyTotal(record))}
-          items={filterNonZeroDetails(getWelfareSubsidyDetails(record))}
+          value={formatMoney(sumDetailItems(getEmployeeWelfareSubsidyDetails(record)))}
+          items={getEmployeeWelfareSubsidyDetails(record)}
         />
       ),
     },
@@ -966,7 +1089,7 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
         <DetailValue
           title={`${record.name} 代扣扣款明细`}
           value={formatMoney(value)}
-          items={record.withholdingDeductionDetails}
+          items={getEmployeeDeductionDetails(record, value)}
         />
       ),
     },
@@ -1435,11 +1558,14 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
               setFilteredInfo({});
               setDepartmentFilteredInfo({});
               setSelectedTreeKeys([]);
+              setFlatDepartmentKeys([]);
+              setFlatDepartmentSearch("");
             }}
           >
             重置筛选
           </Button>
-          <span className="payroll-approval__title">{info.cycle} 办公室人员</span>
+          {toolbarExtra}
+          {showTitle ? <span className="payroll-approval__title">{info.cycle} 办公室人员</span> : null}
         </Space>
       </div>
 
@@ -1473,13 +1599,22 @@ export function PayrollApprovalDetail({ info }: PayrollApprovalDetailProps) {
           {departmentView === "flat" ? (
             <div className="payroll-department-flat-layout">
               <aside className="payroll-department-flat-layout__tree">
+                <Input.Search
+                  placeholder="搜索部门"
+                  allowClear
+                  size="small"
+                  value={flatDepartmentSearch}
+                  onChange={(event) => setFlatDepartmentSearch(event.target.value)}
+                />
                 <Tree
                   checkable
                   showIcon
-                  defaultExpandAll
+                  autoExpandParent={Boolean(flatDepartmentSearch.trim())}
                   checkedKeys={flatDepartmentKeys}
+                  expandedKeys={flatDepartmentSearch.trim() ? defaultExpandedDepartmentKeys : flatExpandedDepartmentKeys}
                   selectedKeys={flatDepartmentKeys}
-                  treeData={buildDepartmentTreeData(info.departments, info.employees)}
+                  treeData={flatDepartmentTreeData}
+                  onExpand={(keys) => setFlatExpandedDepartmentKeys(keys.map((key) => String(key)))}
                   onCheck={(keys) => {
                     const checkedKeys = Array.isArray(keys) ? keys : [];
                     setFlatDepartmentKeys(

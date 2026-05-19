@@ -2,6 +2,7 @@ export type ProductMenuDoc = {
   menu: string;
   route: string;
   documentPath: string;
+  relatedDocumentPaths?: string[];
   status: "已建立" | "持续迭代";
   updatedAt: string;
 };
@@ -11,8 +12,9 @@ export const productMenuDocs: ProductMenuDoc[] = [
     menu: "展示首页",
     route: "/home",
     documentPath: "docs/product/home.md",
+    relatedDocumentPaths: ["docs/product/README.md", "docs/page-standards.md"],
     status: "已建立",
-    updatedAt: "2026-05-12",
+    updatedAt: "2026-05-15",
   },
   {
     menu: "用户管理",
@@ -99,6 +101,14 @@ export const productMenuDocs: ProductMenuDoc[] = [
     updatedAt: "2026-05-12",
   },
   {
+    menu: "薪酬统计",
+    route: "/oa/payroll/statistics",
+    documentPath: "docs/product/oa/payroll-management/payroll-statistics.md",
+    relatedDocumentPaths: ["docs/product/oa/approval-management/approval-handling.md"],
+    status: "持续迭代",
+    updatedAt: "2026-05-18",
+  },
+  {
     menu: "项目看板",
     route: "/oa/project/dashboard",
     documentPath: "docs/product/oa/project/project-dashboard.md",
@@ -144,6 +154,7 @@ export const productMenuDocs: ProductMenuDoc[] = [
     menu: "低值易耗品",
     route: "/oa/assets/low-value-consumables",
     documentPath: "docs/product/oa/asset-management/low-value-consumables.md",
+    relatedDocumentPaths: ["docs/product/oa/asset-management/low-value-consumables-prd.md"],
     status: "持续迭代",
     updatedAt: "2026-05-15",
   },

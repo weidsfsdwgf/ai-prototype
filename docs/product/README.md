@@ -17,6 +17,7 @@
 - 每个可访问菜单都有一份 `docs/product/...` 产品文档。
 - 产品文档已登记到 `src/data/productDocs.ts`，确保展示首页的产品文档入口能找到。
 - 产品文档已登记到本文档的“菜单文档索引”。
+- 页面可通过顶部 `文档` 入口查看当前页面对应文档；单页多文档时在 `relatedDocumentPaths` 中登记，入口需支持标签切换和一键复制。
 - 页面实现遵守 `docs/page-standards.md` 中对应页面类型的标准。
 - 若发现新标准或修正过往偏差，同步更新 `docs/page-standards.md` 或本目录维护规则。
 - 完成后执行构建校验，并在交付说明中说明文档、菜单索引和页面标准的核对结果。
@@ -38,6 +39,7 @@
 | 绩效管理 | `/oa/performance/records` | `docs/product/oa/performance-management/performance-management.md` | 持续迭代 |
 | 评分表配置 | `/oa/performance/scorecards` | `docs/product/oa/performance-management/scorecard-config.md` | 持续迭代 |
 | 指标库 | `/oa/performance/metric-library` | `docs/product/oa/performance-management/metric-library.md` | 持续迭代 |
+| 薪酬统计 | `/oa/payroll/statistics` | `docs/product/oa/payroll-management/payroll-statistics.md` | 持续迭代 |
 | 项目看板 | `/oa/project/dashboard` | `docs/product/oa/project/project-dashboard.md` | 持续迭代 |
 | 需求工单 | `/oa/project/requirement-tickets` | `docs/product/oa/project/requirement-tickets.md` | 持续迭代 |
 | OA申请 | `/oa/approval/applications` | `docs/product/oa/approval-management/oa-application.md` | 持续迭代 |

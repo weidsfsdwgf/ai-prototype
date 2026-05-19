@@ -1,0 +1,26 @@
+.payroll-statistics-page {
+  align-content: start;
+}
+
+.payroll-statistics-toolbar-field {
+  width: 140px;
+}
+
+.payroll-statistics-page .payroll-approval__toolbar {
+  padding: 10px 12px;
+  border: 1px solid #dbe6f0;
+  border-radius: 8px;
+  background: #f8fbfd;
+}
+
+.payroll-statistics-page .payroll-approval__subtoolbar {
+  padding: 8px 10px;
+  border: 1px solid #e3eaf1;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.payroll-statistics-page .payroll-employee-layout__tree,
+.payroll-statistics-page .payroll-department-flat-layout__tree {
+  background: #ffffff;
+}

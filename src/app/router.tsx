@@ -10,6 +10,7 @@ import { MyInitiatedApprovalsPage } from "../pages/MyInitiatedApprovalsPage";
 import { OaApplicationPage } from "../pages/OaApplicationPage";
 import { OrgStructurePage } from "../pages/OrgStructurePage";
 import { PerformanceManagementPage } from "../pages/PerformanceManagementPage";
+import { PayrollStatisticsPage } from "../pages/PayrollStatisticsPage";
 import { ProbationManagementPage } from "../pages/ProbationManagementPage";
 import { ProjectDashboardPage } from "../pages/ProjectDashboardPage";
 import { RequirementTicketsPage } from "../pages/RequirementTicketsPage";
@@ -48,6 +49,7 @@ export const router = createBrowserRouter([
       { path: "oa/performance/records", element: <PerformanceManagementPage /> },
       { path: "oa/performance/scorecards", element: <ScorecardConfigPage /> },
       { path: "oa/performance/metric-library", element: <MetricLibraryPage /> },
+      { path: "oa/payroll/statistics", element: <PayrollStatisticsPage /> },
       { path: "oa/approval/applications", element: <OaApplicationPage /> },
       { path: "oa/approval/handling", element: <ApprovalHandlingPage /> },
       { path: "oa/approval/initiated", element: <MyInitiatedApprovalsPage /> },

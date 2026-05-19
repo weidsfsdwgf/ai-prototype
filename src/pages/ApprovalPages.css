@@ -316,7 +316,7 @@
 .payroll-probation-name {
   height: auto;
   padding: 0;
-  color: var(--color-warning) !important;
+  color: var(--color-primary) !important;
   font-size: inherit;
   line-height: inherit;
 }
@@ -330,7 +330,7 @@
 }
 
 .payroll-probation-name:hover {
-  color: var(--color-warning) !important;
+  color: var(--color-action-link-hover) !important;
 }
 
 .payroll-detail-list {
@@ -355,6 +355,12 @@
   line-height: 20px;
 }
 
+.payroll-detail-empty {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
 .payroll-employee-layout {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
@@ -370,6 +376,9 @@
 }
 
 .payroll-department-flat-layout__tree {
+  display: grid;
+  align-content: start;
+  gap: 10px;
   min-width: 0;
   padding: 10px;
   border: 1px solid var(--color-border);

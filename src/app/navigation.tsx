@@ -144,6 +144,19 @@ export const navigationItems: NavigationItem[] = [
           },
         ],
       },
+      {
+        key: "oa-payroll",
+        label: "薪酬管理",
+        icon: <BarChart3 size={18} />,
+        children: [
+          {
+            key: "oa-payroll-statistics",
+            label: "薪酬统计",
+            path: "/oa/payroll/statistics",
+            icon: <BarChart3 size={18} />,
+          },
+        ],
+      },
     ],
   },
   {
