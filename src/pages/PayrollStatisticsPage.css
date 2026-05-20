@@ -1,5 +1,6 @@
 .payroll-statistics-page {
   align-content: start;
+  min-height: calc(100vh - 96px);
 }
 
 .payroll-statistics-toolbar-field {
@@ -23,4 +24,64 @@
 .payroll-statistics-page .payroll-employee-layout__tree,
 .payroll-statistics-page .payroll-department-flat-layout__tree {
   background: #ffffff;
+}
+
+.payroll-statistics-panel,
+.payroll-statistics-panel .section-panel__body,
+.payroll-statistics-panel .payroll-approval,
+.payroll-statistics-panel .payroll-approval__stack {
+  min-height: 0;
+}
+
+.payroll-statistics-panel .section-panel__body {
+  padding: 12px;
+}
+
+.payroll-statistics-panel .payroll-approval {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: calc(100vh - 118px);
+}
+
+.payroll-statistics-panel .payroll-approval__stack {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.payroll-statistics-panel .payroll-employee-layout,
+.payroll-statistics-panel .payroll-department-flat-layout {
+  gap: 0;
+  min-height: 0;
+}
+
+.payroll-statistics-panel .payroll-employee-layout__tree,
+.payroll-statistics-panel .payroll-department-flat-layout__tree {
+  max-height: none;
+  overflow: hidden;
+}
+
+.payroll-statistics-panel .payroll-employee-layout__tree .ant-tree,
+.payroll-statistics-panel .payroll-department-flat-layout__tree .ant-tree {
+  max-height: calc(100vh - 244px);
+  overflow: auto;
+}
+
+.payroll-statistics-panel .payroll-tree-title,
+.payroll-statistics-panel .payroll-employee-layout__tree .ant-tree-title,
+.payroll-statistics-panel .payroll-department-flat-layout__tree .ant-tree-title {
+  max-width: calc(100% - 10px);
+}
+
+.payroll-statistics-panel .payroll-employee-layout__table,
+.payroll-statistics-panel .payroll-department-flat-layout__table {
+  min-width: 0;
+  min-height: 0;
+}
+
+.payroll-statistics-panel .ant-table-small .ant-table-thead > tr > th,
+.payroll-statistics-panel .ant-table-small .ant-table-tbody > tr > td,
+.payroll-statistics-panel .ant-table-small .ant-table-summary > tr > td {
+  padding: 3px 5px;
+  font-size: 12px;
+  line-height: 18px;
 }
