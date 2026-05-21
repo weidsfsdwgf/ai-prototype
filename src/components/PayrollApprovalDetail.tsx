@@ -61,6 +61,15 @@ const employeeDetailCategoryOptions: Array<{ label: string; value: EmployeeDetai
 ];
 
 const departmentLevelLabels = ["一", "二", "三", "四", "五", "六", "七", "八", "九"];
+const defaultHiddenEmployeeOverviewColumnKeys = [
+  "departmentLevel1",
+  "departmentLevel2",
+  "departmentLevel5",
+  "departmentLevel6",
+  "departmentLevel7",
+  "departmentLevel8",
+  "departmentLevel9",
+];
 
 const moneyFormatter = new Intl.NumberFormat("zh-CN", {
   minimumFractionDigits: 0,
@@ -742,7 +751,10 @@ export function PayrollApprovalDetail({
   const [expandedTreeKeys, setExpandedTreeKeys] = useState<TreeFilterKey[]>(initialDepartmentKeys);
   const [treeSearch, setTreeSearch] = useState("");
   const [selectedEmployeeDetailCategories, setSelectedEmployeeDetailCategories] = useState<EmployeeDetailCategory[]>([]);
-  const [hiddenEmployeeColumnKeys, setHiddenEmployeeColumnKeys] = useState<EmployeeColumnConfig>({ overview: [], detail: [] });
+  const [hiddenEmployeeColumnKeys, setHiddenEmployeeColumnKeys] = useState<EmployeeColumnConfig>({
+    overview: defaultHiddenEmployeeOverviewColumnKeys,
+    detail: [],
+  });
   const [employeeColumnOrders, setEmployeeColumnOrders] = useState<EmployeeColumnConfig>({ overview: [], detail: [] });
   const [draggingEmployeeColumnKey, setDraggingEmployeeColumnKey] = useState<string>();
   const [hiddenDepartmentColumnKeys, setHiddenDepartmentColumnKeys] = useState<string[]>([]);
@@ -941,8 +953,9 @@ export function PayrollApprovalDetail({
       title: "部门名称",
       dataIndex: "name",
       key: "name",
-      width: 240,
+      width: departmentView === "tree" ? 360 : 240,
       fixed: "left",
+      className: departmentView === "tree" ? "payroll-department-name-cell payroll-department-name-cell--tree" : "payroll-department-name-cell",
       filterSearch: true,
       filters: uniqueOptions(departments.map((department) => department.name)),
       filteredValue: departmentFilteredInfo.name ?? null,
@@ -1209,7 +1222,7 @@ export function PayrollApprovalDetail({
       title: "区域",
       dataIndex: "area",
       key: "area",
-      width: 112,
+      width: 64,
       filters: uniqueOptions(info.employees.map((employee) => employee.area)),
       filteredValue: filteredInfo.area ?? null,
       onFilter: (value, record) => record.area === value,
@@ -1488,7 +1501,7 @@ export function PayrollApprovalDetail({
       title: "人员明细",
       key: "profileDetails",
       children: [
-        { title: "区域", dataIndex: "area", key: "detailArea", width: 92 },
+        { title: "区域", dataIndex: "area", key: "detailArea", width: 64 },
         { title: "部门", dataIndex: "department", key: "detailDepartment", width: 120 },
         { title: "岗位", dataIndex: "position", key: "detailPosition", width: 110 },
         { title: "职级", dataIndex: "rank", key: "detailRank", width: 70 },
@@ -1739,8 +1752,18 @@ export function PayrollApprovalDetail({
           </Button>
         ),
       },
-      { title: "区域", dataIndex: "area", key: "area", width: 90 },
-      { title: "部门", dataIndex: "department", key: "department", width: 110 },
+      { title: "区域", dataIndex: "area", key: "area", width: 64 },
+      {
+        title: "部门",
+        dataIndex: "department",
+        key: "department",
+        width: 180,
+        render: (department: string) => (
+          <Popover content={department} trigger="hover">
+            <span className="payroll-cell-ellipsis">{department}</span>
+          </Popover>
+        ),
+      },
       { title: "入职日期", dataIndex: "hireDate", key: "hireDate", width: 100 },
       { title: "转正日期", dataIndex: "regularDate", key: "regularDate", width: 100 },
     ];
@@ -1975,6 +1998,11 @@ export function PayrollApprovalDetail({
 
     return baseColumns;
   };
+  const departmentDetailColumns = detailModal ? makeDepartmentDetailColumns(detailModal.kind) : [];
+  const departmentDetailTableScrollX = Math.max(
+    820,
+    flattenPayrollColumns(departmentDetailColumns).reduce((total, column) => total + getPayrollColumnWidth(column), 0),
+  );
 
   const employeeLeafColumns = flattenPayrollColumns(employeeColumns);
   const getEmployeeSummaryValue = (key: string, employee: PayrollEmployeeRecord) => {
@@ -2316,11 +2344,10 @@ export function PayrollApprovalDetail({
                   <Checkbox.Group
                     value={visibleLevels}
                     onChange={setVisibleLevels}
-                    options={[
-                      { label: "一级部门", value: 1 },
-                      { label: "二级部门", value: 2 },
-                      { label: "三级部门", value: 3 },
-                    ]}
+                    options={departmentLevelLabels.map((label, index) => ({
+                      label: `${label}级部门`,
+                      value: index + 1,
+                    }))}
                   />
                 </div>
               ) : null}
@@ -2523,12 +2550,12 @@ export function PayrollApprovalDetail({
       >
         {detailModal ? (
           <Table
-            columns={makeDepartmentDetailColumns(detailModal.kind)}
+            columns={departmentDetailColumns}
             dataSource={getDepartmentEmployees(detailModal.department)}
             pagination={false}
             rowKey="id"
             size="small"
-            scroll={{ x: 820, y: payrollModalTableScrollY }}
+            scroll={{ x: departmentDetailTableScrollX, y: payrollModalTableScrollY }}
             tableLayout="fixed"
           />
         ) : null}

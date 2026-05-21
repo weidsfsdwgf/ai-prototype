@@ -63,13 +63,53 @@
 .payroll-statistics-panel .payroll-employee-layout__tree .ant-tree,
 .payroll-statistics-panel .payroll-department-flat-layout__tree .ant-tree {
   max-height: calc(100vh - 244px);
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.payroll-statistics-panel .payroll-employee-layout__tree .ant-tree-treenode,
+.payroll-statistics-panel .payroll-department-flat-layout__tree .ant-tree-treenode {
+  display: flex;
+  max-width: 100%;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.payroll-statistics-panel .payroll-employee-layout__tree .ant-tree-switcher,
+.payroll-statistics-panel .payroll-department-flat-layout__tree .ant-tree-switcher,
+.payroll-statistics-panel .payroll-employee-layout__tree .ant-tree-checkbox,
+.payroll-statistics-panel .payroll-department-flat-layout__tree .ant-tree-checkbox,
+.payroll-statistics-panel .payroll-employee-layout__tree .ant-tree-iconEle,
+.payroll-statistics-panel .payroll-department-flat-layout__tree .ant-tree-iconEle {
+  flex: 0 0 auto;
+}
+
+.payroll-statistics-panel .payroll-employee-layout__tree .ant-tree-node-content-wrapper,
+.payroll-statistics-panel .payroll-department-flat-layout__tree .ant-tree-node-content-wrapper {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-width: 0;
+  max-width: none;
+  align-items: center;
 }
 
 .payroll-statistics-panel .payroll-tree-title,
 .payroll-statistics-panel .payroll-employee-layout__tree .ant-tree-title,
 .payroll-statistics-panel .payroll-department-flat-layout__tree .ant-tree-title {
-  max-width: calc(100% - 10px);
+  flex: 0 0 auto;
+  min-width: 0;
+  width: auto;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.payroll-statistics-panel .payroll-tree-title > span:first-child {
+  min-width: 0;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 .payroll-statistics-panel .payroll-employee-layout__table,
@@ -84,4 +124,21 @@
   padding: 3px 5px;
   font-size: 12px;
   line-height: 18px;
+}
+
+.payroll-statistics-panel .ant-table-small .ant-table-tbody > tr > td.payroll-department-name-cell--tree {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.payroll-statistics-panel .payroll-department-name-cell--tree .payroll-department-link {
+  max-width: 100%;
+  align-items: flex-start;
+  text-align: left;
+  white-space: normal;
+}
+
+.payroll-statistics-panel .payroll-department-name-cell--tree .payroll-department-link > span {
+  white-space: normal;
 }

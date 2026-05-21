@@ -593,6 +593,11 @@
   white-space: nowrap;
 }
 
+.payroll-detail-modal .ant-table-small .ant-table-tbody > tr > td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .payroll-employee-modal__content {
   display: grid;
   gap: 8px;

@@ -53182,11 +53182,36 @@ const payrollEmployees = [
   }
 ] satisfies PayrollEmployeeRecord[];
 
+const payrollAreaOptions = ["厦门", "深圳", "成都"];
+
+function normalizePayrollArea(employee: PayrollEmployeeRecord, index: number) {
+  const departmentText = employee.department;
+
+  if (departmentText.includes("厦门")) {
+    return "厦门";
+  }
+
+  if (departmentText.includes("深圳")) {
+    return "深圳";
+  }
+
+  if (departmentText.includes("成都")) {
+    return "成都";
+  }
+
+  return payrollAreaOptions[index % payrollAreaOptions.length];
+}
+
+const normalizedPayrollEmployees = payrollEmployees.map((employee, index) => ({
+  ...employee,
+  area: normalizePayrollArea(employee, index),
+}));
+
 export const payrollApprovalInfo: PayrollApprovalInfo = {
   cycle: "2026-04",
   organization: "福建拉森科技有限公司",
   submittedBy: "林珊",
   submittedAt: "2026-05-08 18:20",
   departments: payrollDepartments,
-  employees: payrollEmployees,
+  employees: normalizedPayrollEmployees,
 };
